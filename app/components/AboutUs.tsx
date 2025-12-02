@@ -25,11 +25,11 @@ const AboutUs = () => {
             With a strong focus on technology, reliability, and trained
             personnel, we deliver round-the-clock protection you can trust.
           </p>
-          <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden" />
         <div className="text-red-500 gap-2 flex items-center justify-around text-xl cursor-pointer">
             <h4>Learn more</h4>
             <span>&rarr;</span>
         </div>
+          <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden" />
         </div>
         <div className='bg-[url("/about.png")] bg-cover bg-center rounded-lg shadow-lg shadow-gray-500'/>
         
