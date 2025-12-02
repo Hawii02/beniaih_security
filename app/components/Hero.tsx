@@ -5,11 +5,11 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="p-16"
+      className="lg:p-16 p-8"
     >
     
-        <div className="grid md:grid-cols-2 gap-8 w-full">
-          <div className="flex-col py-18 flex items-start justify-between gap-12">
+        <div className="grid md:grid-cols-2 gap-8 w-full lg:border-b lg:border-b-red-500 lg:pb-20">
+          <div className="flex-col lg:py-18 flex items-start justify-between gap-12">
             <h1 className="text-6xl font-semibold">
               Your Security,
               <br /> <span className="text-red-500">Our Priority.</span>
@@ -23,6 +23,7 @@ const Hero = () => {
               <Button title="Sign Up" />
               <Button title="Book Now" />
             </div>
+            <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden"/>
           </div>
           {/* <div className='bg-[url("/hero.jpeg")] bg-cover bg-center rounded-lg shadow-lg'> */}
           <div

@@ -24,7 +24,7 @@ const Header = () => {
     },
   ];
   return (
-    <header className="flex items-center justify-between mx-16 py-3 border-b-red-500 border-b-3">
+    <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3">
       <div>
         <h1 className="text-2xl font-extrabold">
           Benaiah <span className="text-red-500">Security</span>
