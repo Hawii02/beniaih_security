@@ -20,8 +20,8 @@ const Hero = () => {
               surveillance systems to create safe, secure environments for all.
             </h3>
             <div className="space-x-8 max-md:mx-auto">
-              <Button title="Sign Up" />
-              <Button title="Book Now" />
+              <Button className="bg-gray-300 hover:text-white" title="Sign Up" />
+              <Button className="bg-red-500 text-white hover:text-black" title="Book Now" />
             </div>
             <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden"/>
           </div>

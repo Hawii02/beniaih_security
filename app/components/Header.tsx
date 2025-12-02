@@ -24,7 +24,8 @@ const Header = () => {
     },
   ];
   return (
-    <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3">
+      <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 sticky top-0 z-50 bg-white shadow-md">
+    {/* // <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3"> */}
       <div>
         <h1 className="text-2xl font-extrabold">
           Benaiah <span className="text-red-500">Security</span> Group
@@ -113,8 +114,9 @@ const Header = () => {
         </div>
       </nav>
       <div className="space-x-8 max-md:hidden">
-        <Button title="Log In" />
-        <Button title="Sign Up" />
+        <Button className="bg-gray-300 hover:text-white"title="Log In" />
+        {/* <Button className="bg-green-300 hover:bg-green-700 text-black" /> */}
+        <Button className="bg-red-500 text-white hover:text-black" title="Sign Up" />
       </div>
     </header>
   );

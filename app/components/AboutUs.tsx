@@ -29,7 +29,7 @@ const AboutUs = () => {
             <h4>Learn more</h4>
             <span>&rarr;</span>
         </div>
-          <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden" />
+          {/* <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden" /> */}
         </div>
         <div className='bg-[url("/about.png")] bg-cover bg-center rounded-lg shadow-lg shadow-gray-500'/>
         
