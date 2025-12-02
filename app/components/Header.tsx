@@ -27,7 +27,7 @@ const Header = () => {
     <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3">
       <div>
         <h1 className="text-2xl font-extrabold">
-          Benaiah <span className="text-red-500">Security</span>
+          Benaiah <span className="text-red-500">Security</span> Group
         </h1>
       </div>
       {/* mobile nav */}
