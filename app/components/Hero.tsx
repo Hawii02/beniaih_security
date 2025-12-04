@@ -14,16 +14,18 @@ const Hero = () => {
               Your Security,
               <br /> <span className="text-red-500">Our Priority.</span>
             </h1>
-            <h3 className="text-2xl">
+            <h3 className="text-xl">
               To become the region&apos;s leading provider of integrated
               security services by combining skilled manpower with advanced
               surveillance systems to create safe, secure environments for all.
             </h3>
             <div className="space-x-8 max-md:mx-auto">
-              <Button className="bg-green-200 hover:text-white" title="Sign Up" />
-              <Button className="bg-red-500 text-white hover:text-black" title="Book Now" />
+              {/* <Button className="bg-green-200 hover:text-white" title="Sign Up" /> */}
+              {/* <Button className="bg-red-500 text-white hover:text-black" title="Book Now" /> */}
+              <Button className="bg-red-500 text-white border border-red-600
+               hover:bg-white transition duration-300 px-4 py-2 rounded-md hover:text-black" title="Book Now" />
             </div>
-            <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden"/>
+            <div className="border-b border-white mt-16 w-4/5 mx-auto md:hidden"/>
           </div>
           {/* <div className='bg-[url("/hero.jpeg")] bg-cover bg-center rounded-lg shadow-lg'> */}
           <div
