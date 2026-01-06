@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import userRoutes from './routes/userRoutes.js'
+import visitorRoutes from './routes/visitorRoutes.js'
 import authRoutes from './routes/auth.js'
 import { corsOptions } from './config/corsOptions.js'
 import connectDB from './config/dbConn.js'
@@ -19,6 +20,7 @@ app.get('/', (req, res) => res.json({success: 'Umefika kwa mabeast sasa, bro.'})
 
 app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
+app.use('/visitors', visitorRoutes)
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB.')

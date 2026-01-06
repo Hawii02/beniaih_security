@@ -30,6 +30,7 @@ const getOneUser = async (req, res) => {
 // roles -> permissions mapping
 const rolePermissions = {
   guard: ['users.read', 'users.write'],
+  host: ['users.read', 'users.write'],
   admin: ['users.read', 'users.write', 'users.update'],
   superadmin: ['users.read', 'users.write', 'users.update', 'users.delete'],
   visitor: []
