@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function AuthForm({ type }: { type: "login" | "register" }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
@@ -23,14 +25,57 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    // TODO: Replace with your API call
-    if (!email || !password) {
-      setError("Email and password are required.");
-      return;
+    
+    // basic validation
+    switch (type) {
+      case "register":
+        if (password !== confirmPassword) {
+          setError("Passwords do not match.");
+          return;
+        }
+        if (!email || !password || !username || !phone) {
+          setError("Email, password, username, and phone are required.");
+          return;
+        }
+        break;
+      case "login":
+        if (!email || !password ) {
+          setError("Email and password are required.");
+          return;
+        }
+        break;
+      default:
+        break;
     }
-    // Example: await login({ email, password, remember });
-  };
 
+    let response;
+    // API call
+    switch (type) {
+      case "login":
+        response = await fetch(`${process.env.LIVE_BACKEND_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (response.ok) router.push("/dashboard");
+        break;
+      case "register":
+        response = await fetch(
+          `${process.env.LIVE_BACKEND_URL}/auth/register`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, phone, username }),
+          }
+        );
+        if (response.ok) router.push("/auth/login");
+        break;
+
+      default:
+        break;
+    }
+
+  };
 
   return (
     <Card className="w-4/5 m-auto max-md:my-10 h-fit">
@@ -97,7 +142,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
               />
               <span
                 className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
-                onClick={() => setShowPassword(prev => !prev)}
+                onClick={() => setShowPassword((prev) => !prev)}
               >
                 {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </span>
@@ -105,28 +150,31 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
           </div>
           {type == "register" && (
             <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                className="pr-10"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                placeholder="********"
-              />
-              <span
-                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
-                onClick={() => setShowConfirmPassword(prev => !prev)}
-              >
-                {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-              </span>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="pr-10"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="********"
+                />
+                <span
+                  className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                >
+                  {showConfirmPassword ? (
+                    <Eye size={16} />
+                  ) : (
+                    <EyeOff size={16} />
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
           )}
           <div className="flex justify-center">
-            
             <div className="flex items-center space-x-2">
               {type == "register" ? (
                 <p className="lg:text-md text-sm">

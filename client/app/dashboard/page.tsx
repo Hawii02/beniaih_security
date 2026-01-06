@@ -1,0 +1,98 @@
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardAction,
+} from "@/components/ui/card";
+import { ChartAreaInteractive } from "../components/InteractiveChart";
+import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+
+export default function Dashboard() {
+  // Example user data and stats
+  const user = {
+    name: "John Doe",
+    email: "john@example.com",
+    role: "Client",
+  };
+  const stats = [
+    { label: "Active Guards", value: 3, icon: IconTrendingUp },
+    { label: "CCTV Devices", value: 5, icon: IconTrendingUp },
+    { label: "Incidents This Month", value: 0, icon: IconTrendingDown },
+    { label: "Projected Income", value: 54000, icon: IconTrendingUp },
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-8">
+        {/* TOP CARD - WELCOME MESSAGE */}
+        <Card className="w-full max-w-8xl mx-auto bg-linear-to-r from-red-700 to-red-500 text-white">
+          <CardHeader>
+            <CardTitle className="text-2xl ">Welcome, {user.name}</CardTitle>
+            <CardDescription className="mt-2 text-white/70">
+              Your dashboard overview
+            </CardDescription>
+          </CardHeader>
+          {/* <CardContent>
+            <div className="mb-6">
+              <div className="text-lg font-medium">Account Info</div>
+              <div className="text-slate-700">Email: {user.email}</div>
+              <div className="text-slate-700">Role: {user.role}</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {stats.map((stat, idx) => (
+                <Card
+                  key={idx}
+                  className="bg-white border border-red-100 shadow-sm"
+                >
+                  <CardContent className="flex flex-col items-center py-6">
+                    <div className="text-3xl font-bold text-red-500">
+                      {stat.value}
+                    </div>
+                    <div className="text-md text-slate-600 mt-2">
+                      {stat.label}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent> */}
+          <CardFooter className="flex justify-end">
+            <span className="text-xs">
+              Last updated: {new Date().toLocaleDateString()}
+            </span>
+          </CardFooter>
+        </Card>
+        {/* STATS */}
+        <div className="flex justify-between max-w-6xl rounded-md">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+            {stats.map((stat, idx) => (
+              <Card
+                key={idx}
+                className="bg-white border border-red-100 shadow-sm"
+              >
+                <CardContent className="flex flex-col items-center justify-center py-6">
+                  <div className="text-3xl font-bold text-red-500 flex items-center">
+                    {stat.value}
+                    <Badge className="bg-red-500 ml-2">
+                      <stat.icon size={8} className="mr-1" />
+                    </Badge>
+                  </div>
+                  <div className="text-md text-slate-600 mt-2 text-center">
+                    {stat.label}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* INTERACTIVE CHART */}
+        <ChartAreaInteractive />
+      </div>
+    </div>
+  );
+}

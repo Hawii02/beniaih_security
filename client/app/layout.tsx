@@ -1,6 +1,6 @@
 'use client'
 
-import type { Metadata } from "next";
+// import { ThemeProvider } from "next-themes";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
@@ -28,15 +28,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isAuthPage = pathname.startsWith("/auth");
+  const isUserPage = pathname.startsWith("/auth") || pathname.startsWith('/dashboard');
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} antialiased`}
       >
-        {!isAuthPage && <Header />}
-        {children}
-        {!isAuthPage && <Footer />}
+        {/* <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem> */}
+          {!isUserPage && <Header />}
+          {children}
+          {!isUserPage && <Footer />}
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );
