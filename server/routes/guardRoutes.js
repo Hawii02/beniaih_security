@@ -90,7 +90,7 @@ router.get(
  *       200:
  *         description: Guard updated
  */
-router.put(
+router.patch(
   "/:id",
   authorizePermissions("admin", "manager"),
   guardsController.updateGuard
@@ -141,7 +141,7 @@ router.delete(
  *       200:
  *         description: Guard status updated
  */
-router.put(
+router.patch(
   "/:id/status",
   authorizePermissions("admin", "manager"),
   guardsController.updateGuardStatus
@@ -192,7 +192,7 @@ router.get(
  *       200:
  *         description: Guard assignment terminated
  */
-router.put(
+router.patch(
   "/:id/assignments/:assignmentId/terminate",
   authorizePermissions("admin", "manager"),
   guardsController.terminateGuardAssignment
