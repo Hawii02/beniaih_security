@@ -70,7 +70,7 @@ router.get(
 /**
  * @swagger
  * /guards/{id}:
- *   put:
+ *   patch:
  *     tags:
  *       - Guards
  *     summary: Update a guard
@@ -121,7 +121,7 @@ router.delete(
 /**
  * @swagger
  * /guards/{id}/status:
- *   put:
+ *   patch:
  *     tags:
  *       - Guards
  *     summary: Update guard status
@@ -173,7 +173,7 @@ router.get(
 /**
  * @swagger
  * /guards/{id}/assignments/{assignmentId}/terminate:
- *   put:
+ *   patch:
  *     tags:
  *       - Guards
  *     summary: Terminate guard assignment
