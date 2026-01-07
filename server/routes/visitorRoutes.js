@@ -4,19 +4,21 @@ import * as visitorsController from '../controllers/visitorsController.js'
 import authMiddleware from '../middleware/authMiddleware.js'
 import authorizePermissions from '../middleware/permissionsMiddleware.js'
 
+router.use(authMiddleware)
+
 // ===== MULTIPLE VISITOR OPERATIONS =====
-router.get('/',authMiddleware, authorizePermissions('users.read'), visitorsController.getAllVisitors)
-router.get('/history',authMiddleware, authorizePermissions('users.read'), visitorsController.getVisitorsHistory)
-router.post('/', authMiddleware, authorizePermissions('users.write'), visitorsController.createVisitor)
-router.get('/analytics/daily-count', authMiddleware, authorizePermissions('users.read'), visitorsController.getDailyVisitorsCount)
-router.get('/analytics/peak-hours', authMiddleware, authorizePermissions('users.read'), visitorsController.getPeakVisitorHours)
-router.get('/analytics/frequent-visitors', authMiddleware, authorizePermissions('users.read'), visitorsController.getFrequentVisitors)
+router.get('/', authorizePermissions('admin','manager', 'guard', 'host'), visitorsController.getAllVisitors)
+router.get('/history', authorizePermissions('admin','manager', 'guard', 'host'), visitorsController.getVisitorsHistory)
+router.post('/', authorizePermissions('admin','manager', 'guard', 'host'), visitorsController.createVisitor)
+router.get('/analytics/daily-count', authorizePermissions('admin','manager'), visitorsController.getDailyVisitorsCount)
+router.get('/analytics/peak-hours', authorizePermissions('admin','manager'), visitorsController.getPeakVisitorHours)
+router.get('/analytics/frequent-visitors', authorizePermissions('admin','manager'), visitorsController.getFrequentVisitors)
 
 // ===== SINGLE VISITOR OPERATIONS =====
-router.get('/:id',authMiddleware, authorizePermissions('users.read'), visitorsController.getOneVisitor)
-router.patch('/:id', authMiddleware, authorizePermissions('users.update'), visitorsController.updateVisitor)
-router.patch('/:id', authMiddleware, authorizePermissions('users.update'), visitorsController.markVisitorArrived)
-router.patch('/:id', authMiddleware, authorizePermissions('users.update'), visitorsController.markVisitorDeparted)
-router.delete('/:id', authMiddleware, authorizePermissions('users.delete'), visitorsController.deleteVisitor)
+router.get('/:id', authorizePermissions('admin','manager', 'guard', 'host'), visitorsController.getOneVisitor)
+router.patch('/:id', authorizePermissions('admin','manager'), visitorsController.updateVisitor)
+router.patch('/:id', authorizePermissions('admin','manager', 'guard'), visitorsController.markVisitorArrived)
+router.patch('/:id', authorizePermissions('admin','manager', 'guard'), visitorsController.markVisitorDeparted)
+router.delete('/:id', authorizePermissions('admin'), visitorsController.deleteVisitor)
 
 export default router    

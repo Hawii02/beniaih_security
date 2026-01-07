@@ -23,18 +23,86 @@ const getOneUser = async (req, res) => {
   }
 
   const user = await User.findOne({ $or: orQuery }).select("-password").lean();
-  if (!user) return res.status(404).json({ message: "User not found.", total: 0 });
-  res.json({ total: 1, user});
+  if (!user)
+    return res.status(404).json({ message: "User not found.", total: 0 });
+  res.json({ total: 1, user });
 };
 
 // roles -> permissions mapping
 const rolePermissions = {
-  guard: ['users.read', 'users.write'],
-  host: ['users.read', 'users.write'],
-  admin: ['users.read', 'users.write', 'users.update'],
-  superadmin: ['users.read', 'users.write', 'users.update', 'users.delete'],
-  visitor: []
-}
+  guard: [
+    "users.read",
+    "users.write",
+    "visitors.read",
+    "visitors.write",
+    "sites.read",
+    "gates.read",
+    "guards.read",
+    "assignments.read",
+    "assignments.write",
+    "logs.read",
+  ],
+  host: [
+    "users.read",
+    "users.write",
+    "visitors.read",
+    "visitors.write",
+    "sites.read",
+    "gates.read",
+    "logs.read",
+  ],
+  admin: [
+    "users.read",
+    "users.write",
+    "users.update",
+    "users.delete",
+    "visitors.read",
+    "visitors.write",
+    "visitors.update",
+    "visitors.delete",
+    "sites.read",
+    "sites.write",
+    "sites.update",
+    "sites.delete",
+    "gates.read",
+    "gates.write",
+    "gates.update",
+    "gates.delete",
+    "guards.read",
+    "guards.write",
+    "guards.update",
+    "guards.delete",
+    "assignments.read",
+    "assignments.write",
+    "assignments.update",
+    "assignments.delete",
+    "logs.read",
+    "logs.export",
+  ],
+  manager: [
+    "users.read",
+    "users.write",
+    "users.update",
+    "visitors.read",
+    "visitors.write",
+    "visitors.update",
+    "sites.read",
+    "sites.write",
+    "sites.update",
+    "gates.read",
+    "gates.write",
+    "gates.update",
+    "guards.read",
+    "guards.write",
+    "guards.update",
+    "assignments.read",
+    "assignments.write",
+    "assignments.update",
+    "logs.read",
+    "logs.export",
+  ],
+  visitor: ["visitors.read", "sites.read", "gates.read", "logs.read"],
+};
 const createUser = async (req, res) => {
   const { username, password, email, phone, role } = req.body;
   if (!username || !password || !email || !phone)
@@ -57,9 +125,16 @@ const createUser = async (req, res) => {
   const hashedPwd = await bcrypt.hash(password, 12);
 
   // assign permissions based on role
-  const permissions = rolePermissions[role] || rolePermissions['visitor'];
+  const permissions = rolePermissions[role] || rolePermissions["visitor"];
 
-  const userObj = { username, email, phone, password: hashedPwd, role, permissions };
+  const userObj = {
+    username,
+    email,
+    phone,
+    password: hashedPwd,
+    role,
+    permissions,
+  };
 
   // create and store the new user
   const user = await User.create(userObj);
@@ -99,7 +174,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { username, email, phone } = req.body;
 
-  const orQuery = []
+  const orQuery = [];
   if (username) orQuery.push({ username });
   if (email) orQuery.push({ email });
   if (phone) orQuery.push({ phone });
