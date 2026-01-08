@@ -128,4 +128,22 @@ router.delete(
   gatesController.deleteGate
 );
 
+/**
+ * @swagger
+ * /gates/{id}:
+ *   get:
+ *     tags:
+ *       - Gates
+ *     summary: Get all active gates
+ *     
+ *     responses:
+ *       200:
+ *         description: List of active gates
+ */
+router.get(
+  "/active",
+  authorizePermissions("admin", "manager"),
+  gatesController.getActiveGates
+);
+
 export default router;

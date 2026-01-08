@@ -4,7 +4,7 @@ import Gate from "../models/Gate.js";
 export const getAllGates = async (req, res) => {
   try {
     const gates = await Gate.find().populate("site");
-    res.status(200).json(gates);
+    res.status(200).json({ total: gates.length, gates });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
