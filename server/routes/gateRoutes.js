@@ -130,7 +130,7 @@ router.delete(
 
 /**
  * @swagger
- * /gates/{id}:
+ * /gates/active:
  *   get:
  *     tags:
  *       - Gates
