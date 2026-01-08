@@ -13,9 +13,9 @@ const loginUser = async (req, res) => {
   try {
     let user = null;
     if (email) {
-      user = await User.findOne({ email });
+      user = await User.findOne({ email }).select('-password');
     } else if (phone) {
-      user = await User.findOne({ phone });
+      user = await User.findOne({ phone }).select('-password');
     }
 
     if (!user) {
@@ -37,8 +37,7 @@ const loginUser = async (req, res) => {
 
     const token = jsonwebtoken.sign(payload, jwtSecret, { expiresIn: "1h" });
 
-    const {password, ...userWithoutPassword} = user.toObject()
-    res.status(200).json({ message: "Login successful.", user: userWithoutPassword, token });
+    res.status(200).json({ message: "Login successful.", user, token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error.");
