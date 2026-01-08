@@ -2,6 +2,7 @@ import React from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "../components/AppSidebar";
 import { DashboardHeader } from "./components/DashboardHeader";
+import DashboardFooter from "./components/DashboardFooter";
 export default function DashboardLayout({
   children,
 }: Readonly<{
@@ -13,6 +14,7 @@ export default function DashboardLayout({
       <main className="min-h-screen w-full">
       <DashboardHeader/>
         {children}
+      <DashboardFooter/>
       </main>
     </SidebarProvider>
   );

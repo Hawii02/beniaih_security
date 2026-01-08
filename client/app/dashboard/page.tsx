@@ -10,6 +10,8 @@ import {
 import { ChartAreaInteractive } from "../components/InteractiveChart";
 import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
+import GuardMetrics from "./components/GuardMetrics";
+import SitesGatesMetrics from "./components/SitesGatesMetrics";
 
 export default function Dashboard() {
   // Example user data and stats
@@ -19,14 +21,14 @@ export default function Dashboard() {
     role: "Client",
   };
   const stats = [
-    { label: "Active Guards", value: 3, icon: IconTrendingUp },
-    { label: "CCTV Devices", value: 5, icon: IconTrendingUp },
-    { label: "Incidents This Month", value: 0, icon: IconTrendingDown },
-    { label: "Projected Income", value: 54000, icon: IconTrendingUp },
+    { label: "Hosts", value: 344, icon: IconTrendingUp },
+    { label: "Sites", value: 15, icon: IconTrendingUp },
+    { label: "Visitors This Month", value: 100, icon: IconTrendingDown },
+    { label: "Guards", value: 54, icon: IconTrendingUp },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50 ">
       <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-8">
         {/* TOP CARD - WELCOME MESSAGE */}
         <Card className="w-full max-w-8xl mx-auto bg-linear-to-r from-red-700 to-red-500 text-white">
@@ -67,7 +69,7 @@ export default function Dashboard() {
           </CardFooter>
         </Card>
         {/* STATS */}
-        <div className="flex justify-between max-w-6xl rounded-md">
+        <div className="flex justify-between max-w-8xl rounded-md">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
             {stats.map((stat, idx) => (
               <Card
@@ -89,9 +91,12 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-
+            {/* GUARD METRICS */}
+        <GuardMetrics />
         {/* INTERACTIVE CHART */}
         <ChartAreaInteractive />
+        {/* SITES AND GATES METRICS */}
+        <SitesGatesMetrics />
       </div>
     </div>
   );

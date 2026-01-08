@@ -1,3 +1,5 @@
+'use client'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,23 +23,29 @@ import {
 import {
   Calendar,
   Home,
-  Inbox,
-  Search,
-  Settings,
+  UsersRound,
+  Building2,
   User2,
   ChevronUp,
+  CircleUserRound,
+  ShieldUser,
+  DoorOpen,
   MessageCircle,
   MessageCircleQuestionMark,
 } from "lucide-react";
 
+import { usePathname } from "next/navigation";
+
 export function AppSidebar() {
+  const pathname = usePathname()
   // menu items
   const items = [
     { label: "Home", icon: Home, href: "/dashboard" },
-    { label: "Search", icon: Search, href: "/dashboard/search" },
-    { label: "Calendar", icon: Calendar, href: "/dashboard/calendar" },
-    { label: "Inbox", icon: Inbox, href: "/dashboard/inbox" },
-    { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+    { label: "Users", icon: UsersRound, href: "/dashboard/users" },
+    { label: "Sites", icon: Building2, href: "/dashboard/sites" },
+    { label: "Visitors", icon: CircleUserRound, href: "/dashboard/visitors" },
+    { label: "Guards", icon: ShieldUser, href: "/dashboard/guards" },
+    { label: "Gates", icon: DoorOpen, href: "/dashboard/gates" },
   ];
 
   const supportItems = [
@@ -49,10 +57,14 @@ export function AppSidebar() {
     },
   ];
   return (
-    <Sidebar collapsible="icon" variant="inset" className="border-r border-slate-300">
+    <Sidebar
+      collapsible="icon"
+      variant="inset"
+      className="border-r border-slate-300"
+    >
       {/* SIDEBAR HEADER */}
-      <SidebarHeader/>
-        {/* <SidebarTrigger /> */}
+      <SidebarHeader />
+      {/* <SidebarTrigger /> */}
       {/* </SidebarHeader> */}
       {/* SIDEBAR CONTENT */}
       <SidebarContent>
@@ -62,16 +74,18 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item, i) => (
+              {items.map((item, i) => {
+                const isActive = pathname === item.href;
+                return (
                 <SidebarMenuItem key={i}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.href}>
-                      <item.icon />
+                  <SidebarMenuButton className={isActive ?"hover:bg-red-500/30 hover:text-red-500" : ''} asChild>
+                    <a href={item.href} className={isActive ? "bg-red-500/20 text-red-500 font-bold" : ""}>
+                      <item.icon className={isActive ? "text-red-500" : "text-slate-500"} />
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )})}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -82,16 +96,17 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {supportItems.map((item, i) => (
-                <SidebarMenuItem key={i}>
+              {supportItems.map((item, i) => {
+                const isActive = pathname === item.href;
+                return (<SidebarMenuItem key={i}>
                   <SidebarMenuButton asChild>
-                    <a href={item.href}>
-                      <item.icon />
+                    <a href={item.href} className={isActive ? "bg-red-500 text-white font-bold" : ""}>
+                      <item.icon className={isActive ? "text-white" : "text-slate-500"} />
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                </SidebarMenuItem>)
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
