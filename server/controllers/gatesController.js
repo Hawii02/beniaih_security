@@ -59,7 +59,7 @@ export const deleteGate = async (req, res) => {
 export const getActiveGates = async (req, res) => {
   try {
     const activeGates = await Gate.find({ status: "active" }).populate("site");
-    res.status(200).json(activeGates);
+    res.status(200).json({total: activeGates.length, gates: activeGates});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
