@@ -17,6 +17,7 @@ import SitesGatesMetrics from "./components/SitesGatesMetrics";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { roleColors, getRoleTextColor } from "@/lib/roleColors";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -105,11 +106,13 @@ export default function Dashboard() {
         // { label: "Total Gates", value: stats.totalGates },
       ]
     : [];
+
+    
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 ">
       <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-8">
         {/* TOP CARD - WELCOME MESSAGE */}
-        <Card className="w-full max-w-8xl mx-auto bg-linear-to-r from-red-700 to-red-500 text-white">
+        <Card className={`w-full max-w-8xl mx-auto ${roleColors[user?.role as keyof typeof roleColors]} text-white`}>
           <CardHeader>
             <CardTitle className="text-2xl ">
               Welcome, {user?.username || "User"}.
@@ -118,30 +121,7 @@ export default function Dashboard() {
               Your dashboard overview
             </CardDescription>
           </CardHeader>
-          {/* <CardContent>
-            <div className="mb-6">
-              <div className="text-lg font-medium">Account Info</div>
-              <div className="text-slate-700">Email: {user.email}</div>
-              <div className="text-slate-700">Role: {user.role}</div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {stats.map((stat, idx) => (
-                <Card
-                  key={idx}
-                  className="bg-white border border-red-100 shadow-sm"
-                >
-                  <CardContent className="flex flex-col items-center py-6">
-                    <div className="text-3xl font-bold text-red-500">
-                      {stat.value}
-                    </div>
-                    <div className="text-md text-slate-600 mt-2">
-                      {stat.label}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent> */}
+          
           <CardFooter className="flex justify-end">
             <span className="text-xs">
               Last updated: {new Date().toLocaleDateString()}
@@ -157,7 +137,7 @@ export default function Dashboard() {
                 className="bg-white border border-red-100 shadow-sm"
               >
                 <CardContent className="flex flex-col items-center justify-center py-6">
-                  <div className="text-3xl font-bold text-red-500 flex items-center">
+                  <div className={`${getRoleTextColor(user?.role)} text-3xl font-bold flex items-center`}>
                     {stat.value}
                     {/* <Badge className="bg-red-500 ml-2">
                       <stat.icon size={8} className="mr-1" />

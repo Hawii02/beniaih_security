@@ -37,6 +37,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useRouter } from "next/navigation";
+import { roleColors, getHoverRoleColor, getRoleBgColor, getRoleTextColor } from "@/lib/roleColors";
 
 
 export function AppSidebar() {
@@ -84,9 +85,9 @@ export function AppSidebar() {
                 const isActive = pathname === item.href;
                 return (
                 <SidebarMenuItem key={i}>
-                  <SidebarMenuButton className={isActive ?"hover:bg-red-500/30 hover:text-red-500" : ''} asChild>
-                    <a href={item.href} className={isActive ? "bg-red-500/20 text-red-500 font-bold" : ""}>
-                      <item.icon className={isActive ? "text-red-500" : "text-slate-500"} />
+                  <SidebarMenuButton className={isActive ? getHoverRoleColor(user?.role) : ''} asChild>
+                    <a href={item.href} className={isActive ? `${getRoleBgColor(user?.role)} ${getHoverRoleColor(user?.role)} ${getRoleTextColor(user?.role)}} font-bold` : ""}>
+                      <item.icon className={isActive ? getRoleTextColor(user?.role) : "text-slate-500"} />
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>

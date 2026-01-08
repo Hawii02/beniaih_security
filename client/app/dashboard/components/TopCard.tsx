@@ -1,5 +1,6 @@
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-// import { DashboardStats, useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/useDashboardStore';
+import { getRoleBgColor, getRoleTextColor, getHoverRoleColor, roleColors } from '@/lib/roleColors';
 import React from 'react'
 
 type TopCardProps = {
@@ -8,9 +9,9 @@ type TopCardProps = {
 }
 
 const TopCard = ({title, description} : TopCardProps) => {
-    
+    const user = useDashboardStore((state) => state.user);
   return (
-    <Card className="w-full max-w-8xl mx-auto bg-linear-to-r from-red-700 to-red-500 text-white">
+    <Card className={`w-full max-w-8xl mx-auto ${roleColors[user?.role as keyof typeof roleColors]} } text-white`}>
           <CardHeader>
             <CardTitle className="text-2xl ">
               {title}

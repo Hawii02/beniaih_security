@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardStats } from "@/store/useDashboardStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getRoleTextColor } from "@/lib/roleColors";
+import { useDashboardStore } from "@/store/useDashboardStore";
 // import { useEffect, useState } from "react";
 
 type GuardMetricsProps = {
@@ -10,6 +12,7 @@ type GuardMetricsProps = {
 };
 
 const GuardMetrics = ({ stats }: GuardMetricsProps) => {
+  const user = useDashboardStore((state) => state.user);
   if (!stats) {
     return (
       <div className="grid grid-cols-2 gap-4">
@@ -31,7 +34,7 @@ const GuardMetrics = ({ stats }: GuardMetricsProps) => {
         {metrics.slice(0,2).map((metric, i) => (
           <Card className="flex justify-center text-center" key={i}>
             <CardContent>
-              <div className="text-3xl font-bold text-red-500">{metric.value}</div>
+              <div className={`${getRoleTextColor(user?.role)} text-3xl font-bold`}>{metric.value}</div>
               <div className="text-lg text-slate-800">{metric.label}</div>
             </CardContent>
           </Card>
@@ -42,7 +45,7 @@ const GuardMetrics = ({ stats }: GuardMetricsProps) => {
         {metrics.slice(2,4).map((metric, i) => (
           <Card className="flex justify-center text-center" key={i}>
             <CardContent>
-              <div className="text-3xl font-bold text-red-500">{metric.value}</div>
+              <div className={`${getRoleTextColor(user?.role)} text-3xl font-bold`}>{metric.value}</div>
               <div className="text-lg text-slate-800">{metric.label}</div>
             </CardContent>
           </Card>

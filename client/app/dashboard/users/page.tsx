@@ -12,11 +12,13 @@ import NewGuardForm from "./components/NewGuardForm";
 import NewVisitorForm from "./components/NewVisitorForm";
 import NewAdminForm from "./components/NewAdminForm";
 import NewManagerForm from "./components/NewManagerForm";
+import { getRoleTextColor, roleColors } from "@/lib/roleColors";
 
 const UsersPage = () => {
   const router = useRouter();
   const userPageStats = useUserDashboardStore((state) => state.userPageStats);
   const token = useDashboardStore((state) => state.token);
+  const user = useDashboardStore((state) => state.user);
 
   useEffect(() => {
     if (!token) router.replace("/auth/login");
@@ -60,7 +62,7 @@ const UsersPage = () => {
               className="bg-white border border-red-100 shadow-sm"
             >
               <CardContent className="flex flex-col items-center justify-center py-6">
-                <div className="text-3xl font-bold text-red-500 flex items-center">
+                <div className={`text-3xl font-bold ${getRoleTextColor(user?.role)} flex items-center`}>
                   {stat.value}
                   {/* <Badge className="bg-red-500 ml-2">
                       <stat.icon size={8} className="mr-1" />
@@ -162,7 +164,7 @@ const UsersPage = () => {
           {/* RHS CARD */}
           <Card className="bg-white border border-red-100 shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-6">
-              <div className="text-3xl font-bold text-red-500 flex items-center">
+              <div className={`text-3xl font-bold ${getRoleTextColor(user?.role)} flex items-center`}>
                 Some Text
                 {/* <Badge className="bg-red-500 ml-2">
                       <stat.icon size={8} className="mr-1" />
