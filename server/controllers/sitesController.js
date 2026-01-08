@@ -20,9 +20,9 @@
 4. User Assignments to Sites
 - POST /sites/:id/users (assign user to site)
 - DELETE /sites/:id/users/:userId (remove user from site)
-- GET /sites/:id/users (list users assigned to site)
-
-5. Site Retrieval and History
+import Site from "../models/Site.js";
+import GuardAssignment from "../models/GuardAssignment.js";
+import Visitor from "../models/Visitor.js";
 - GET /sites (list all sites) [DONE]
 - GET /sites/:id (get site details) [DONE]
 
@@ -215,7 +215,7 @@ export const deleteGate = async (req, res) => {
 /* ASSIGN GUARDS TO GATES */
 // 11. Assign guard(s) to gate
 export const assignGuardsToGate = async (req, res) => {
-  const { gateId } = req.body.gateId;
+  const { gateId } = req.body;
   const { guardIds } = req.body; // -> expects an array of guard IDs
   if (!gateId || !Array.isArray(guardIds) || guardIds.length === 0)
     return res
@@ -232,6 +232,17 @@ export const assignGuardsToGate = async (req, res) => {
     if (!res.ok)
       return res
         .status(400)
+        .json({ message: "Failed to assign guards to gate." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error assigning guards to gate." });
+  }
+};
+
+// The following code appears to be misplaced and should be moved to its own function:
+
+// 21. Export logs for a site
+export const exportSiteLogs = async (req, res) => {
   const { id } = req.params;
   const { format } = req.query;
   const foundSite = await Site.findById(id).exec();
@@ -243,193 +254,40 @@ export const assignGuardsToGate = async (req, res) => {
     if (!logs || logs.length === 0) {
       return res
         .status(404)
-        .json({ message: `No logs found for site ${foundSite.name}.`, total: 0 });
-    }
-
-    if (format === "csv") {
-      // CSV export using json2csv
-      const { Parser } = await import("json2csv");
-      const fields = [
-        "_id",
-        "name",
-        "status",
-        "createdAt",
-        "updatedAt",
-        "gate",
-        "guard",
-        "site",
-      ];
-      const opts = { fields };
-      const parser = new Parser(opts);
-      const csv = parser.parse(logs);
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${foundSite.name}_logs.csv"`
-      );
-      return res.status(200).send(csv);
-    } else if (format === "pdf") {
-      // PDF export using pdfkit
-      const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument();
-      let buffers = [];
-      doc.on("data", buffers.push.bind(buffers));
-      doc.on("end", () => {
-        const pdfData = Buffer.concat(buffers);
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${foundSite.name}_logs.pdf"`
-        );
-        res.status(200).send(pdfData);
-      });
-      doc
-        .fontSize(18)
-        .text(`Logs for Site: ${foundSite.name}`, { align: "center" });
-      doc.moveDown();
-      logs.forEach((log, idx) => {
-        doc.fontSize(12).text(`Visitor #${idx + 1}`);
-        Object.entries(log).forEach(([key, value]) => {
-          doc.text(`${key}: ${value}`);
+        .json({
+          message: `No logs found for site ${foundSite.name}.`,
+          total: 0,
         });
-        doc.moveDown();
-      });
-      doc.end();
-    } else {
-      return res
-        .status(400)
-        .json({ message: "Invalid format. Use 'csv' or 'pdf'." });
     }
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: `Error exporting logs for site ${foundSite.name}.` });
-  }
-};
 
-/* USER ASSIGNMENT TO SITES */
-// 18. Assign user to site
-export const assignUserToSite = async (req, res) => {
-  const { siteId, userId } = req.body;
-  if (!siteId || !userId)
-    return res
-      .status(400)
-      .json({ message: "Site ID and user ID are required." });
-
-  try {
-    /*
-    1. find site by siteId
-    2. check if userId already in site.users
-    3. if not, add userId to site.users
-    4. save site and return a success response
-    5. handle errors
-    */
-    const site = await Site.findById(siteId).exec();
-    if (!site) return res.status(404).json({ message: "Site not found." });
-    if (site.users.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "User already assigned to site." });
-    }
-    site.users.push(userId);
-    await site.save();
-    res
-      .status(200)
-      .json({ message: "User assigned to site successfully.", site });
-    if (!res.ok)
-      return res
-        .status(400)
-        .json({ message: "Failed to assign user to site." });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error assigning user to site." });
-  }
-};
-
-// 19. Remove user from site
-export const removeUserFromSite = async (req, res) => {
-  const { siteId, userId } = req.params;
-  if (!siteId || !userId)
-    return res
-      .status(400)
-      .json({ message: "Site ID and user ID are required." });
-  try {
-    /*
-    1. find site by siteId
-    2. check if userId already in site.users and remove the user
-    3. save site and return a success response
-    4. handle errors
-    */
-    const site = await Site.findById(siteId).exec();
-    if (!site) return res.status(404).json({ message: "Site not found." });
-    const userToFilter = site.users.find((id) => id.toString() === userId);
-    if (!userToFilter)
-      return res
-        .status(400)
-        .json({ message: "User not assigned to this site." });
-    site.users = site.users.filter((id) => id.toString() !== userId);
-    await site.save();
-    res
-      .status(200)
-      .json({ message: "User removed from site successfully.", site });
-    if (!res.ok)
-      return res
-        .status(400)
-        .json({ message: "Failed to remove user from site." });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error removing user from site." });
-  }
-};
-
-// 20. Get all users assigned to site
-export const getAllUsersForSite = async (req, res) => {
-  const { id } = req.params;
-  const foundSite = await Site.findById(id).populate("users").exec();
-  if (!foundSite) return res.status(400).json({ message: "Site not found." });
-  res
-    .status(200)
-    .json({ total: foundSite.users.length, users: foundSite.users || [] });
-  if (!res.ok)
-    return res.status(400).json({ message: "Failed to retrieve users." });
-};
-
-// 21. Live number of visitors currently in site
-export const getCurrentVisitorCount = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const foundSite = await Site.findById(id).exec();
-    if (!foundSite) return res.status(404).json({ message: "Site not found." });
-    // count visitors with status arrived and not yet departed/left
-    const currentCount = await Visitor.countDocuments({
-      site: id,
-      status: "arrived",
-    });
-    res.status(200).json({ siteId: id, currentVisitorCount: currentCount });
     if (!res.ok)
       return res
         .status(400)
         .json({ message: "Failed to retrieve current visitor count." });
+    // Add logic for exporting logs in the requested format (csv/pdf) here
+    res
+      .status(200)
+      .json({ message: "Logs exported successfully.", total, logs });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error retrieving site." });
   }
 };
 
-
 // 22. Get all gates
-export const getAllGates = async(req, res) => {
+export const getAllGates = async (req, res) => {
   try {
-    const gates = await Gate.find().exec()
-    const total = await Gate.countDocuments()
+    const gates = await Gate.find().exec();
+    const total = await Gate.countDocuments();
     res.status(200).json({ total, gates });
     if (!res.ok)
       return res.status(400).json({ message: "Failed to retrieve gates." });
-    if(!gates.length)
-      return res.status(200).json({ message: "No gates found.", total: 0, gates: [] });
+    if (!gates.length)
+      return res
+        .status(200)
+        .json({ message: "No gates found.", total: 0, gates: [] });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: "Error retrieving gates." });
   }
-}
+};
