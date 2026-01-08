@@ -80,7 +80,9 @@ export default function Dashboard() {
         totalSites: sites.total,
         activeSites: sites.total, // placeholder
         totalGates: gates.total,
-        activeGates: gates.gates.filter((g: { status: string; }) => g.status === 'active').length, // placeholder
+        activeGates: Array.isArray(gates.gates)
+          ? gates.gates.filter((g: { status: string }) => g.status === "active").length
+          : 0,
         visitorsThisMonth: visitors.total,
       };
       useDashboardStore.getState().setStats(stats);
@@ -109,7 +111,9 @@ export default function Dashboard() {
         {/* TOP CARD - WELCOME MESSAGE */}
         <Card className="w-full max-w-8xl mx-auto bg-linear-to-r from-red-700 to-red-500 text-white">
           <CardHeader>
-            <CardTitle className="text-2xl ">Welcome, {user?.name || 'User'}.</CardTitle>
+            <CardTitle className="text-2xl ">
+              Welcome, {user?.username || "User"}.
+            </CardTitle>
             <CardDescription className="mt-2 text-white/70">
               Your dashboard overview
             </CardDescription>
