@@ -5,6 +5,8 @@ export const getAllGates = async (req, res) => {
   try {
     const gates = await Gate.find().populate("site");
     res.status(200).json({ total: gates.length, gates });
+    if (gates.length === 0)
+      return res.status(200).json({ message: "No gates found", total: 0, gates: [] });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -60,6 +62,8 @@ export const getActiveGates = async (req, res) => {
   try {
     const activeGates = await Gate.find({ status: "active" }).populate("site");
     res.status(200).json({total: activeGates.length, gates: activeGates});
+    if (activeGates.length === 0)
+      return res.status(200).json({ message: "No active gates found", total: 0, gates: [] });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
