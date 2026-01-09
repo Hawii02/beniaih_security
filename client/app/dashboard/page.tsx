@@ -73,18 +73,18 @@ export default function Dashboard() {
       }).then((res) => res.json()),
     ]).then(([users, sites, visitors, guards, gates]) => {
       const stats = {
-        totalGuards: guards.total,
+        totalGuards: users.users.filter((u: { role: string }) => u.role === "guard").length,
         activeGuards: guards.total, // placeholder
         guardsOnLeave: 0, // placeholder
         guardsAvailable: guards.total, // placeholder
-        hosts: users.total,
+        totalUsers: users.total,
         totalSites: sites.total,
         activeSites: sites.total, // placeholder
         totalGates: gates.total,
         activeGates: Array.isArray(gates.gates)
           ? gates.gates.filter((g: { status: string }) => g.status === "active").length
           : 0,
-        visitorsThisMonth: visitors.total,
+        visitorsThisMonth: users.users.filter((u: { role: string }) => u.role === "visitor").length,
       };
       useDashboardStore.getState().setStats(stats);
     });
@@ -92,7 +92,7 @@ export default function Dashboard() {
 
   const statsArray = stats
     ? [
-        { label: "Hosts", value: stats.hosts },
+        { label: "Total Users", value: stats.totalUsers },
         {
           label: "Total Guards",
           value: stats.totalGuards,
@@ -110,7 +110,7 @@ export default function Dashboard() {
     
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 ">
-      <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-8">
+      <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-4">
         {/* TOP CARD - WELCOME MESSAGE */}
         <Card className={`w-full max-w-8xl mx-auto ${roleColors[user?.role as keyof typeof roleColors]} text-white`}>
           <CardHeader>

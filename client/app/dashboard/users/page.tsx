@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TopCard from "../components/TopCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
@@ -13,12 +13,21 @@ import NewVisitorForm from "./components/NewVisitorForm";
 import NewAdminForm from "./components/NewAdminForm";
 import NewManagerForm from "./components/NewManagerForm";
 import { getRoleTextColor, roleColors } from "@/lib/roleColors";
+import { ChartAreaInteractive } from "@/app/components/InteractiveChart";
+import { ChartBarStacked } from "./components/StackedBarChart";
+import   {NotificationsList}  from "./components/NotificationsList";
 
 const UsersPage = () => {
   const router = useRouter();
   const userPageStats = useUserDashboardStore((state) => state.userPageStats);
   const token = useDashboardStore((state) => state.token);
   const user = useDashboardStore((state) => state.user);
+
+  const [isHostOpen, setIsHostOpen] = useState(false);
+  const [isGuardOpen, setIsGuardOpen] = useState(false);
+  const [isVisitorOpen, setIsVisitorOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
 
   useEffect(() => {
     if (!token) router.replace("/auth/login");
@@ -50,7 +59,7 @@ const UsersPage = () => {
     : [];
 
   return (
-    <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-8">
+    <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-4">
       <TopCard title="User Management" description="Manage your users here." />
 
       {/* STATS CARDS */}
@@ -76,16 +85,18 @@ const UsersPage = () => {
           ))}
         </div>
       </div>
+
+      {/* SECOND ROW OF UI CARDS */}
       <div className="flex justify-between max-w-8xl rounded-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 w-full">
           {/* LHS CARD */}
-          <Card className="bg-white border border-red-100 shadow-sm">
+          <Card className="bg-white border border-red-100 shadow-sm md:col-span-2">
             <CardContent className="flex flex-col items-start justify-center py-6">
-              <div className="flex flex-col items-center mx-auto w-4/5 ">
+              <div className="flex flex-col items-center justify-center mx-auto w-4/5 ">
                 <h1 className="text-2xl text-slate-500 font-light mb-8">Quick Actions</h1>
                 <div className="flex flex-col w-full justify-between items-start gap-4 mt-2">
                   {/* NEW HOST BUTTON AND DIALOG */}
-                  <Dialog>
+                  <Dialog open={isHostOpen} onOpenChange={setIsHostOpen}>
                     <DialogTrigger asChild>
                       <button className="px-3 py-1 w-full bg-linear-to-r from-green-800 to-green-600 text-white shadow-sm rounded-lg cursor-pointer">
                           <h3 className="">Create New Host</h3>
@@ -93,13 +104,13 @@ const UsersPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogTitle className="text-center">Create New Host</DialogTitle>
-                        <NewHostForm/>
+                        <NewHostForm onSuccess={(() => setIsHostOpen(false))}/>
                       <DialogDescription>
                       </DialogDescription>
                     </DialogContent>
                   </Dialog>
                   {/* NEW GUARD BUTTON */}
-                  <Dialog>
+                  <Dialog open={isGuardOpen} onOpenChange={setIsGuardOpen}>
                     <DialogTrigger asChild>
                       <button className="px-3 py-1 w-full bg-linear-to-r from-blue-800 to-blue-600 text-white shadow-sm rounded-lg cursor-pointer">
                           <h3 className="">Create New Guard</h3>
@@ -107,13 +118,13 @@ const UsersPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogTitle className="text-center">Create New Guard</DialogTitle>
-                        <NewGuardForm/>
+                        <NewGuardForm onSuccess={(() => setIsGuardOpen(false))}/>
                       <DialogDescription>
                       </DialogDescription>
                     </DialogContent>
                   </Dialog>
                   {/* NEW VISITOR BUTTON */}
-                  <Dialog>
+                  <Dialog open={isVisitorOpen} onOpenChange={setIsVisitorOpen}>
                     <DialogTrigger asChild>
                       <button className="px-3 py-1 w-full bg-linear-to-r from-purple-800 to-purple-600 text-white shadow-sm rounded-lg cursor-pointer">
                           <h3 className="">Create New Visitor</h3>
@@ -121,13 +132,13 @@ const UsersPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogTitle className="text-center">Create New Visitor</DialogTitle>
-                        <NewVisitorForm/>
+                        <NewVisitorForm onSuccess={(() => setIsVisitorOpen(false))}/>
                       <DialogDescription>
                       </DialogDescription>
                     </DialogContent>
                   </Dialog>
                   {/* NEW ADMIN BUTTON */}
-                  <Dialog>
+                  <Dialog open={isAdminOpen} onOpenChange={setIsAdminOpen}>
                     <DialogTrigger asChild>
                       <button className="px-3 py-1 w-full bg-linear-to-r from-red-800 to-red-600 text-white shadow-sm rounded-lg cursor-pointer">
                           <h3 className="">Create New Admin</h3>
@@ -135,13 +146,13 @@ const UsersPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogTitle className="text-center">Create New Admin</DialogTitle>
-                        <NewAdminForm/>
+                        <NewAdminForm onSuccess={(() => setIsAdminOpen(false))}/>
                       <DialogDescription>
                       </DialogDescription>
                     </DialogContent>
                   </Dialog>
                   {/* NEW MANAGER BUTTON */}
-                  <Dialog>
+                  <Dialog open={isManagerOpen} onOpenChange={setIsManagerOpen}>
                     <DialogTrigger asChild>
                       <button className="px-3 py-1 w-full bg-linear-to-r from-cyan-800 to-cyan-600 text-white shadow-sm rounded-lg cursor-pointer">
                           <h3 className="">Create New Manager</h3>
@@ -149,7 +160,7 @@ const UsersPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogTitle className="text-center">Create New Manager</DialogTitle>
-                        <NewManagerForm/>
+                        <NewManagerForm onSuccess={(() => setIsManagerOpen(false))}/>
                       <DialogDescription>
                       </DialogDescription>
                     </DialogContent>
@@ -162,19 +173,29 @@ const UsersPage = () => {
           </Card>
 
           {/* RHS CARD */}
-          <Card className="bg-white border border-red-100 shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center py-6">
-              <div className={`text-3xl font-bold ${getRoleTextColor(user?.role)} flex items-center`}>
-                Some Text
-                {/* <Badge className="bg-red-500 ml-2">
-                      <stat.icon size={8} className="mr-1" />
-                    </Badge> */}
-              </div>
-              <div className="text-md text-slate-600 mt-2 text-center">
-                Some Other Text
-              </div>
+          <div className="md:col-span-3">
+              {/* <ChartAreaInteractive/> */}
+              <ChartBarStacked/>
+          </div>
+        </div>
+      </div>
+
+      {/* THIRD ROW OF UI CARDS */}
+      <div className="flex justify-between max-w-8xl rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 w-full">
+          {/* LHS CARD */}
+          <Card className="bg-white border border-red-100 shadow-sm md:col-span-3">
+            <CardContent className="flex flex-col items-start justify-center py-6">
+              <NotificationsList/>
+              
             </CardContent>
           </Card>
+
+          {/* RHS CARD */}
+          <div className="md:col-span-2">
+              {/* <ChartAreaInteractive/> */}
+              <ChartBarStacked/>
+          </div>
         </div>
       </div>
     </div>

@@ -11,9 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 
-export default function NewGuardForm() {
+type NewGuardFormProps = {
+  onSuccess?: () => void;
+};
+
+export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
   const setUser = useDashboardStore((state) => state.setUser);
-  const setToken = useDashboardStore((state) => state.setToken);
+  const token = useDashboardStore((state) => state.token);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,27 +28,32 @@ export default function NewGuardForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     // Basic validation
-    if (!email || !phone || !username || !password || !confirmPassword) {
+    if (!email || !phone || !username || !password) {
       setError("All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, phone, username, password }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            phone: Number(phone),
+            username,
+            password,
+            role: "guard",
+          }),
         }
       );
       if (!response.ok) {
@@ -52,12 +61,13 @@ export default function NewGuardForm() {
         setError(data.message || "Failed to create guard.");
         return;
       }
+      onSuccess && onSuccess();
       // Optionally reset form or close dialog here
+      
       setEmail("");
       setPhone("");
       setUsername("");
       setPassword("");
-      setConfirmPassword("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
@@ -106,6 +116,17 @@ export default function NewGuardForm() {
               onChange={(e) => setPhone(e.target.value)}
               required
               placeholder="Phone number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Password"
             />
           </div>
           

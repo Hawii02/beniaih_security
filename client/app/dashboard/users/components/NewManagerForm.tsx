@@ -11,9 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 
-export default function NewManagerForm() {
+export default function NewManagerForm({ onSuccess }: { onSuccess?: () => void }) {
   const setUser = useDashboardStore((state) => state.setUser);
-  const setToken = useDashboardStore((state) => state.setToken);
+  const token = useDashboardStore((state) => state.token);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -30,35 +30,41 @@ export default function NewManagerForm() {
     setError("");
 
     // Basic validation
-    if (!email || !phone || !username || !password || !confirmPassword) {
+    if (!email || !phone || !username || !password) {
       setError("All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, phone, username, password }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            phone: Number(phone),
+            username,
+            password,
+            role: "manager",
+          }),
         }
       );
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create guard.");
+        setError(data.message || "Failed to create manager.");
         return;
       }
+      onSuccess && onSuccess();
       // Optionally reset form or close dialog here
+      
       setEmail("");
       setPhone("");
       setUsername("");
       setPassword("");
-      setConfirmPassword("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
@@ -106,6 +112,17 @@ export default function NewManagerForm() {
               onChange={(e) => setPhone(e.target.value)}
               required
               placeholder="Phone number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Password"
             />
           </div>
 

@@ -13,7 +13,7 @@ export type DashboardStats = {
   activeGuards: number;
   guardsOnLeave: number;
   guardsAvailable: number;
-  hosts: number;
+  totalUsers: number;
   totalSites: number;
   activeSites: number;
   totalGates: number;

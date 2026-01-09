@@ -11,9 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 
-export default function NewAdminForm() {
+export default function NewAdminForm({ onSuccess }: { onSuccess?: () => void }) {
   const setUser = useDashboardStore((state) => state.setUser);
-  const setToken = useDashboardStore((state) => state.setToken);
+  const token = useDashboardStore((state) => state.token);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,46 +24,53 @@ export default function NewAdminForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     // Basic validation
-    if (!email || !phone || !username || !password || !confirmPassword) {
+    if (!email || !phone || !username || !password) {
       setError("All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, phone, username, password }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            phone: Number(phone),
+            username,
+            password,
+            role: "visitor",
+          }),
         }
       );
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create guard.");
+        setError(data.message || "Failed to create visitor.");
         return;
       }
+      onSuccess && onSuccess();
       // Optionally reset form or close dialog here
+      
       setEmail("");
       setPhone("");
       setUsername("");
       setPassword("");
-      setConfirmPassword("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
       setError("An error occurred. Please try again.");
     }
   };
+
 
   return (
     <Card className="w-4/5 m-auto max-md:my-10 h-fit">
@@ -106,6 +113,17 @@ export default function NewAdminForm() {
               onChange={(e) => setPhone(e.target.value)}
               required
               placeholder="Phone number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Password"
             />
           </div>
           
