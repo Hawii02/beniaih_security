@@ -4,8 +4,8 @@ import Button from "./Button";
 const ContactUs = () => {
   return (
     <section id="contact" className="lg:px-16 lg:py-4 p-8 lg:mb-8">
-      <div className="grid md:grid-cols-2 gap-8 w-full ">
-        <div className="flex-col lg:py-18 flex items-start justify-between">
+      <div className="grid md:grid-cols-2 w-full ">
+        <div className="flex-col flex items-start justify-between">
           <h1 className="text-4xl font-semibold">Contact Us</h1>
           <p className="text-lg my-4">Our team would love to hear from you.</p>
           <form
@@ -70,11 +70,11 @@ const ContactUs = () => {
               />
             </div>
             <div className="bg-red-500 rounded-md w-fit mx-auto">
-              <Button title="Submit Message" />
+              <Button title="Submit Message" className="text-white hover:text-black"/>
             </div>
           </form>
         </div>
-        <div className='bg-[url("/contact.png")] bg-cover bg-center rounded-lg shadow-lg shadow-gray-500' />
+        <div className='bg-[url("/contact.png")] bg-cover bg-center rounded-lg shadow-md shadow-gray-500' />
       </div>
     </section>
   );

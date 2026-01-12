@@ -4,7 +4,7 @@ const AboutUs = () => {
   return (
     <section id="about" className="lg:px-16 lg:py-4 p-8">
       <div className="grid md:grid-cols-2 gap-8 w-full lg:border-b lg:border-b-white lg:pb-20">
-        <div className="flex-col lg:py-18 flex items-start justify-between">
+        <div className="flex-col flex items-start justify-between">
           <span className="text-red-500 mb-4">Why we're different</span>
           <h1 className="text-4xl font-semibold">About Us</h1>
           <p className="text-lg my-4">

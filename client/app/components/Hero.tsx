@@ -22,8 +22,8 @@ const Hero = () => {
             <div className="space-x-8 max-md:mx-auto">
               {/* <Button className="bg-green-200 hover:text-white" title="Sign Up" /> */}
               {/* <Button className="bg-red-500 text-white hover:text-black" title="Book Now" /> */}
-              <Button className="bg-red-500 text-white border border-red-600
-               hover:bg-white transition duration-300 px-4 py-2 rounded-md hover:text-black" title="Book Now" />
+              <Button className="bg-red-500 text-white 
+               transition duration-300 px-4 py-2 rounded-md hover:text-black" title="Book Now" />
             </div>
             <div className="border-b border-white mt-16 w-4/5 mx-auto md:hidden"/>
           </div>

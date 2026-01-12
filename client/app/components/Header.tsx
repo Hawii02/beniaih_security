@@ -2,8 +2,10 @@
 import React from "react";
 import Button from "./Button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const links = [
     {
@@ -23,9 +25,35 @@ const Header = () => {
       url: "#contact",
     },
   ];
+  const mobileNavLinks = [
+    {
+      name: "Home",
+      url: "#home",
+    },
+    {
+      name: "About Us",
+      url: "#about",
+    },
+    {
+      name: "Pricing",
+      url: "#pricing",
+    },
+    {
+      name: "Contact Us",
+      url: "#contact",
+    },
+    {
+      name: "Log In",
+      url: "/auth/login",
+    },
+    {
+      name: "Sign Up",
+      url: "/auth/register",
+    },
+  ];
   return (
-      <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 sticky top-0 z-50 bg-white shadow-md">
-    {/* // <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3"> */}
+    <header className="flex items-center justify-between lg:px-16 px-8 py-3 rounded-xl sticky top-0 z-50 bg-white shadow-md">
+      {/* // <header className="flex items-center justify-between lg:mx-16 mx-8 py-3 border-b-red-500 border-b-3"> */}
       <div>
         <h1 className="text-2xl font-extrabold">
           Benaiah <span className="text-red-500">Security</span> Group
@@ -84,7 +112,7 @@ const Header = () => {
               </button>
             </div>
             <ul className="space-y-2">
-              {links.map((it) => (
+              {mobileNavLinks.map((it) => (
                 <li key={it.url}>
                   <Link
                     href={it.url}
@@ -114,10 +142,19 @@ const Header = () => {
         </div>
       </nav>
       <div className="space-x-8 max-md:hidden">
-        <Button className="hover:bg-gray-200 transition duration-300 hover:text-black px-2 py-2 rounded-md" title="Log In" />
+        <a href="/auth/login">
+          <Button
+            className="hover:bg-gray-200 transition duration-300 hover:text-black px-2 py-2 rounded-md"
+            title="Log In"
+          />
+        </a>
         {/* <Button className="bg-green-300 hover:bg-green-700 text-black" /> */}
-        <Button className="bg-red-500 text-white border border-red-600
-               hover:bg-white transition duration-300 px-3 py-2 rounded-md hover:text-black"title="Sign Up" />
+        <a href="/auth/register">
+          <Button
+            className="bg-red-500 text-white transition duration-300 px-3 py-2 rounded-md hover:text-black"
+            title="Sign Up"
+          />
+        </a>
       </div>
     </header>
   );
