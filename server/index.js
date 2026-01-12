@@ -46,7 +46,8 @@ app.use('/visitors', visitorRoutes)
 app.use('/sites', siteRoutes)
 app.use('/gates', gateRoutes)
 app.use('/guards', guardRoutes)
-app.use('/guardAssignments', guardAssignmentRoutes)
+app.use('/guard-assignments', guardAssignmentRoutes)
+app.use('/contact-messages', contactMessageRoutes)
 
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB.')
