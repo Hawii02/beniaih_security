@@ -34,7 +34,7 @@ const app = express()
 
 connectDB()
 
-app.use(cors(corsOptions))
+app.use(cors())
 
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
