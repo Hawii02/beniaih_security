@@ -10,11 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { Spinner } from "@/components/ui/spinner"
 
 export default function AuthForm({ type }: { type: "login" | "register" }) {
   const setUser = useDashboardStore((state) => state.setUser);
   const setToken = useDashboardStore((state) => state.setToken);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
@@ -55,6 +57,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
     // API call
     switch (type) {
       case "login":
+        setIsLoading(true);
         response = await fetch(`${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -70,6 +73,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
         }
         break;
       case "register":
+        setIsLoading(true);
         response = await fetch(
           `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/register`,
           {
@@ -213,7 +217,10 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
               type="submit"
               className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
-              {type == "register" ? "Register" : "Sign In"}
+              <div className="w-fit flex items-center gap-2">
+                {isLoading && <Spinner className="mx-auto size-4" /> }
+                {type == "register" ? "Register" : "Sign In"}
+              </div>
             </Button>
           </div>
         </form>
