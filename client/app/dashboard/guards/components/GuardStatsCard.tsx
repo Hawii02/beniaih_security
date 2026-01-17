@@ -96,36 +96,36 @@ const GuardStatsCard = () => {
       status: "arrived",
     },
     {
-      name: "Alice Johnson",
-      phone: 1234567890,
+      name: "Facundo Pellistri",
+      phone: 6789012345,
       checkInTime: "2024-10-01T09:00:00Z",
       checkOutTime: null,
       status: "arrived",
     },
     {
-      name: "Bob Smith",
-      phone: 2345678901,
+      name: "John Jones",
+      phone: 7890123456,
       checkInTime: "2024-10-01T10:30:00Z",
       checkOutTime: "2024-10-01T12:00:00Z",
       status: "departed",
     },
     {
-      name: "Charlie Brown",
-      phone: 3456789012,
+      name: "Gus Fring",
+      phone: 8901234567,
       checkInTime: "2024-10-01T11:15:00Z",
       checkOutTime: null,
       status: "arrived",
     },
     {
-      name: "Diana Prince",
-      phone: 4567890123,
+      name: "Hannibal Bates",
+      phone: 9012345678,
       checkInTime: "2024-10-01T08:45:00Z",
       checkOutTime: "2024-10-01T11:30:00Z",
       status: "departed",
     },
     {
-      name: "Ethan Hunt",
-      phone: 5678901234,
+      name: "Inez Gonzalez",
+      phone: 1123456789,
       checkInTime: "2024-10-01T09:30:00Z",
       checkOutTime: null,
       status: "arrived",
@@ -195,7 +195,7 @@ const GuardStatsCard = () => {
           <Dialog open={isGuardOpen} onOpenChange={setIsGuardOpen}>
             <DialogTrigger asChild>
               <Button className={`${roleColors[user?.role as keyof typeof roleColors] } cursor-pointer`}>
-                <PlusCircle /> Create New Guard
+                <PlusCircle /> <p className="max-md:hidden">Create New Guard</p>
               </Button>
             </DialogTrigger>
             <DialogContent>

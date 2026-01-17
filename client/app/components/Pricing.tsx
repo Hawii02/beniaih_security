@@ -47,7 +47,7 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="lg:px-16 lg:py-4 p-8">
+    <section id = 'pricing' className="lg:px-16 lg:py-4 p-8">
       <div className="gap-8 w-full lg:border-b lg:border-b-white lg:pb-20">
         <div className="lg:w-3/5 flex flex-col items-start justify-between">
           <span className="text-red-500 mb-4">Simple, transparent pricing</span>
