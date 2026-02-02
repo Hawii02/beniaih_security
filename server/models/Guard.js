@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const guardSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    idNumber: { type: String, required: true, unique: true }, // National ID or employee number
+    idNumber: { type: Number, required: true, unique: true }, // National ID or employee number
     phoneNumber: { type: Number, unique: true, required: true },
     email: { type: String, required: true, unique: true },
     assignedSite: { type: mongoose.Schema.Types.ObjectId, ref: "Site" },
