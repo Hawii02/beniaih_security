@@ -80,7 +80,7 @@ export const getAllSites = async (req, res) => {
 // 3. Get one site
 export const getOneSite = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const site = await Site.findById(id).exec();
     res.status(200).json({ total: 1, site });
     
