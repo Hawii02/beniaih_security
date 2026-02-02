@@ -68,15 +68,15 @@ export const getAllSites = async (req, res) => {
   try {
     const sites = await Site.find();
     const total = await Site.countDocuments();
-    res.status(200).json({ total, sites });
-    if (!res.ok)
-      return res.status(400).json({ message: "Failed to retrieve sites." });
+    
+    // Just send one response and return
+    return res.status(200).json({ total, sites });
+    
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error retrieving sites." });
+    return res.status(500).json({ message: "Error retrieving sites." });
   }
 };
-
 // 3. Get one site
 export const getOneSite = async (req, res) => {
   try {
