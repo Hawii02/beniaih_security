@@ -51,6 +51,9 @@ export const createGate = async (req, res) => {
       { $push: { gates: gate._id } },
       { new: true }
     );
+
+     // Populate the site before returning
+    await gate.populate('site');
     
     return res.status(201).json({ 
       message: "Gate created successfully.",
