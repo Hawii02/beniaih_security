@@ -116,14 +116,13 @@ export const updateSite = async (req, res) => {
 // 5. Delete site
 export const deleteSite = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const site = await Site.findById(id).exec();
     if (!site) return res.status(400).json({ message: "Site not found." });
     await Site.deleteOne(site);
 
     res.status(200).json({ message: "Site deleted successfully.", site });
-    if (!res.ok)
-      return res.status(400).json({ message: "Failed to delete site." });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error deleting site." });
