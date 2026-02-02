@@ -83,8 +83,7 @@ export const getOneSite = async (req, res) => {
     const { id } = req.body;
     const site = await Site.findById(id).exec();
     res.status(200).json({ total: 1, site });
-    if (!res.ok)
-      return res.status(400).json({ message: "Failed to retrieve site." });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error retrieving site." });
