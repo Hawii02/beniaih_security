@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,38 +10,129 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { toast } from "sonner"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
+
+import { toast } from "sonner";
 
 type NewGateFormProps = {
   onSuccess?: () => void;
 };
 
 export default function NewGateForm({ onSuccess }: NewGateFormProps) {
-  const setUser = useDashboardStore((state) => state.setUser);
+  const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const sites = useDashboardStore((state) => state.sites);
+  const setSites = useDashboardStore((state) => state.setSites);
+  const guards = useDashboardStore((state) => state.guards);
+  const setGuards = useDashboardStore((state) => state.setGuards);
+  const addGate = useDashboardStore((state) => state.addGate);
+
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"active" | "inactive">("inactive");
+  const [siteId, setSiteId] = useState("");
+  const [selectedGuards, setSelectedGuards] = useState<string[]>([]); // Store guard IDs
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch sites and guards when component mounts
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (sites.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch sites");
+
+        const data = await response.json();
+        const sitesWithId = data.sites.map((site: any) => ({
+          ...site,
+          id: site._id,
+        }));
+        setSites(sitesWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+        toast.error("Failed to load sites");
+      }
+    };
+
+    const fetchGuards = async () => {
+      if (guards.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch guards");
+
+        const data = await response.json();
+        const guardsWithId = data.guards.map((guards: any) => ({
+          ...guards,
+          id: guards._id,
+        }));
+        setGuards(guardsWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+        toast.error("Failed to load sites");
+      }
+    };
+
+    if (token) {
+      fetchSites();
+      fetchGuards();
+    }
+  }, [token, sites.length, guards.length, setSites, setGuards]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     // Basic validation
-    if (!email || !phone || !username || !password) {
-      setError("All fields are required.");
+    if (!name || !siteId) {
+      setError("Name and site are required.");
+      setIsLoading(false);
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/gates`,
         {
           method: "POST",
           headers: {
@@ -49,34 +140,54 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email,
-            phone: Number(phone),
-            username,
-            password,
-            role: "host",
+            name,
+            status,
+            site: siteId, // Send site ID
+            guards: selectedGuards, // Send array of guard IDs
           }),
-        }
+        },
       );
+
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create host.");
-        toast.error(data.message || "Failed to create host.");
+        setError(data.message || "Failed to create gate.");
+        toast.error(data.message || "Failed to create gate.");
+        setIsLoading(false);
         return;
       }
-      toast.success("Host created successfully!");
+
+      const responseData = await response.json();
+      // Map _id to id for consistency
+      const gateWithId = {
+        ...responseData.gate,
+        id: responseData.gate._id,
+      };
+
+      addGate(gateWithId); // Add gate with the MongoDB-generated ID
+      toast.success("Gate created successfully!");
       onSuccess && onSuccess();
-      // Optionally reset form or close dialog here
-      
-      setEmail("");
-      setPhone("");
-      setUsername("");
-      setPassword("");
+
+      // Reset form
+      setName("");
+      setStatus("inactive");
+      setSiteId("");
+      setSelectedGuards([]);
       setError("");
-      // Optionally, show a success message or refresh the list
     } catch (err) {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const anchor = useComboboxAnchor();
+
+  // Create a map of guard names to IDs for the combobox
+  const guardItems = guards.map((guard) => ({
+    id: guard.id,
+    name: guard.name,
+  }));
 
   return (
     <Card className="w-4/5 m-auto max-md:my-10 h-fit">
@@ -87,58 +198,106 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="site">Site</Label>
+            <Select
+              value={siteId}
+              onValueChange={(value: string) => setSiteId(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select site" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectGroup>
+                  {sites.map((site) => (
+                    <SelectItem key={site.id} value={site.id}>
+                      {site.name} - {site.location}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="name">Gate Name</Label>
             <Input
-              id="username"
+              id="name"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Username"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              placeholder="Phone number"
+              placeholder="Main Gate"
             />
           </div>
 
+          
+
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="text"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Password"
-            />
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={status}
+              onValueChange={(value: "active" | "inactive") => setStatus(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectGroup>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="guards">Assign Guards (Optional)</Label>
+            <Combobox
+              multiple
+              autoHighlight
+              items={guardItems}
+              value={selectedGuards}
+              onValueChange={setSelectedGuards}
+            >
+              <ComboboxChips ref={anchor} className="w-full">
+                <ComboboxValue>
+                  {(values) => (
+                    <>
+                      {values.map((guardId: string) => {
+                        const guard = guards.find((g) => g.id === guardId);
+                        return (
+                          <ComboboxChip key={guardId}>
+                            {guard?.name || guardId}
+                          </ComboboxChip>
+                        );
+                      })}
+                      <ComboboxChipsInput placeholder="Select guards..." />
+                    </>
+                  )}
+                </ComboboxValue>
+              </ComboboxChips>
+              <ComboboxContent anchor={anchor}>
+                <ComboboxEmpty>No guards found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item) => (
+                    <ComboboxItem key={item.id} value={item.id}>
+                      {item.name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
 
           <div className="w-2/5 mx-auto">
             <Button
               type="submit"
-              className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
+              disabled={isLoading}
+              className="bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
-              Create Host
+              {isLoading ? "Creating..." : "Create Gate"}
             </Button>
           </div>
         </form>

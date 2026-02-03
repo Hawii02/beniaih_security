@@ -2,22 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardStats } from "@/store/useDashboardStore";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getRoleBgColor, getRoleTextColor, roleColors } from "@/lib/roleColors";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  SortingState,
-  getSortedRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-} from "@tanstack/react-table";
-
-import { Table } from "@chakra-ui/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MoreHorizontal, ArrowUpDown, PlusCircle } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -40,6 +26,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import NewSiteForm from "./NewSiteForm";
+import { Table } from "../../components/Table";
+import UpdateSiteForm from "./UpdateSiteForm";
 // import NewVisitorForm from "./NewVisitorForm";
 // import { useEffect, useState } from "react";
 
@@ -50,109 +38,193 @@ type GuardMetricsProps = {
 // const GuardMetrics = ({ stats }: GuardMetricsProps) => {
 const SiteStatsCard = () => {
   const user = useDashboardStore((state) => state.user);
-  
+  const token = useDashboardStore((state) => state.token);
+  const sites = useDashboardStore((state) => state.sites);
+  const setSites = useDashboardStore((state) => state.setSites);
+  const deleteSite = useDashboardStore((state) => state.deleteSite);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch sites.");
+        }
+        const data = await response.json();
+        const sitesWithId = data.sites.map((site: any) => ({
+          ...site,
+          id: site._id ,
+        }));
+        setSites(sitesWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (token) fetchSites();
+  }, [token, setSites]);
 
   const metrics = [
-    { label: "Total Sites", value: 20 },
-    { label: "Active Sites", value: 10 },
-    { label: "Inactive Sites", value: 10 },
-  ];
-
-
-  const visitors = [
+    { label: "Total Sites", value: sites.length },
     {
-      name: "Alice Johnson",
-      phone: 1234567890,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Active Sites",
+      value: sites.filter((site) => site.status === "active").length,
     },
     {
-      name: "Bob Smith",
-      phone: 2345678901,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Charlie Brown",
-      phone: 3456789012,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Diana Prince",
-      phone: 4567890123,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Ethan Hunt",
-      phone: 5678901234,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Alice Johnson",
-      phone: 1234567890,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Bob Smith",
-      phone: 2345678901,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Charlie Brown",
-      phone: 3456789012,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Diana Prince",
-      phone: 4567890123,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Ethan Hunt",
-      phone: 5678901234,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Inactive Sites",
+      value: sites.filter((site) => site.status === "inactive").length,
     },
   ];
 
+  
+  const columns = [
+    { header: "Name", key: "name" },
+    { header: "Location", key: "location" },
+    {
+      header: "Gates",
+      key: "gates",
+      render: (row: any) => row.gates?.length || 0
+    },
+    {
+      header: "Hosts",
+      key: "hosts",
+      render: (row: any) => row.hosts?.length || 0 
+    },
+    {
+      header: "Guards",
+      key: "guards",
+      render: (row: any) => row.guards?.length || 0 
+    },
+    {
+      header: "Status",
+      key: "status",
+      render: (row: any) =>
+        row.status == "active" ? (
+          <span className="px-2 py-1 bg-green-200 rounded-md text-green-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ) : (
+          <span className="px-2 py-1 bg-red-200 rounded-md text-red-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ),
+    },
+
+    {
+      header: "Actions",
+      key: "actions",
+      render: (row: any) => {
+        //  console.log("Row data:", row);
+        return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="text-center">
+            <Dialog open={isSiteOpen} onOpenChange={setIsSiteOpen}>
+              <DialogTrigger asChild>
+                <DropdownMenuLabel className="cursor-pointer hover:text-yellow-700/90">
+                  Edit
+                </DropdownMenuLabel>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle className="text-center">Edit Site</DialogTitle>
+                <UpdateSiteForm
+                  site={row}
+                  onSuccess={() => setIsSiteOpen(false)}
+                />
+                <DialogDescription></DialogDescription>
+              </DialogContent>
+            </Dialog>
+
+            <DropdownMenuSeparator />
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+              <DialogTrigger asChild>
+                <DropdownMenuLabel className="cursor-pointer hover:text-red-700">
+                  Delete
+                </DropdownMenuLabel>
+              </DialogTrigger>
+              <DialogContent className="text-center">
+                <DialogTitle>Delete Site</DialogTitle>
+                <DialogDescription className="text-lg">
+                  Are you sure you want to delete this site?
+                </DialogDescription>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    handleDeleteClick(row.id);
+                  }}
+                  className="w-2/5 mx-auto"
+                >
+                  Yes. Delete site
+                </Button>
+              </DialogContent>
+            </Dialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )},
+    },
+  ];
+
+  const handleDeleteClick = async (id: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!response.ok) throw new Error("Failed to delete site.");
+      deleteSite(id); // local store update
+      setIsDeleteOpen(false);
+    } catch (error) {
+      console.error("Error deleting site: ", error);
+    }
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
   const [isSiteOpen, setIsSiteOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
-  // Filter visitors based on filter state
-  const filteredVisitors = visitors.filter((visitor) => {
+  // Filter sites based on filter state
+  const filteredSites = sites!.filter((site) => {
     const search = filter.toLowerCase();
     return (
-      visitor.name.toLowerCase().includes(search) ||
-      visitor.phone.toString().includes(search) ||
-      (visitor.status ? visitor.status.toLowerCase().includes(search) : false)
+      site.name.toLowerCase().includes(search) ||
+      site.location.toLowerCase().includes(search)
     );
   });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredVisitors.length / pageSize) || 1;
-  const paginatedVisitors = filteredVisitors.slice(
+  const totalPages = Math.ceil(filteredSites.length / pageSize) || 1;
+  const paginatedSites = filteredSites.slice(
     (page - 1) * pageSize,
-    page * pageSize
+    page * pageSize,
   );
+
+  // if (isLoading) {
+  //   return <div className="text-center">Loading sites...</div>; // Proper loading component to be added
+  // }
 
   return (
     <div className="gap-4 w-full h-1/4">
@@ -194,97 +266,22 @@ const SiteStatsCard = () => {
           {/* NEW SITE BUTTON AND DIALOG */}
           <Dialog open={isSiteOpen} onOpenChange={setIsSiteOpen}>
             <DialogTrigger asChild>
-              <Button className={`${roleColors[user?.role as keyof typeof roleColors] } cursor-pointer`}>
-                <PlusCircle /> Create New Site
+              <Button
+                className={`${roleColors[user?.role as keyof typeof roleColors]} cursor-pointer`}
+              >
+                <PlusCircle /> 
+                <p className="max-lg:hidden">Create New Site</p>
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogTitle className="text-center">
-                Create New Site
-              </DialogTitle>
+              <DialogTitle className="text-center">Create New Site</DialogTitle>
               <NewSiteForm onSuccess={() => setIsSiteOpen(false)} />
               <DialogDescription></DialogDescription>
             </DialogContent>
           </Dialog>
         </div>
         <div className="overflow-hidden rounded-lg border max-w-6xl p-3 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-In Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-Out Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedVisitors.length ? (
-                paginatedVisitors.map((visitor, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkInTime
-                        ? new Date(visitor.checkInTime).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkOutTime
-                        ? new Date(visitor.checkOutTime).toLocaleTimeString(
-                            [],
-                            { hour: "2-digit", minute: "2-digit" }
-                          )
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuLabel>Edit</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Delete</DropdownMenuLabel>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="h-24 text-center">
-                    No results.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <Table columns={columns} data={paginatedSites} />
           <div className="flex items-center justify-end space-x-2 py-4">
             <Button
               variant="outline"
@@ -316,4 +313,4 @@ const SiteStatsCard = () => {
   );
 };
 
-export default  SiteStatsCard;
+export default SiteStatsCard;

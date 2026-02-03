@@ -156,14 +156,14 @@ export default function Dashboard() {
 
         {/* GUARD STATS -> FOR GUARD DASHBOARD */}
         {/* <GuardStatsCard stats={stats}/> */}
-        <GuardStatsCard />
+        {(user?.role == 'guard' && <GuardStatsCard />)}
         {/* GUARD METRICS */}
         {(user?.role == 'admin' || user?.role == 'manager') && <GuardMetrics stats={stats} />}
-        {/* INTERACTIVE CHART */}
-        {(user?.role == 'admin' || user?.role == 'manager') && <ChartAreaInteractive />}
-        {/* SITES AND GATES METRICS */}
-        {(user?.role == 'admin' || user?.role == 'manager') && <SitesGatesMetrics stats={stats} />}
       </div>
     </div>
   );
 }
+// INTERACTIVE CHART
+// {(user?.role == 'admin' || user?.role == 'manager') && <ChartAreaInteractive />}
+// {/* SITES AND GATES METRICS */}
+// {(user?.role == 'admin' || user?.role == 'manager') && <SitesGatesMetrics stats={stats} />}

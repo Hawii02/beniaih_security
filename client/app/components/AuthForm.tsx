@@ -227,6 +227,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
           <div className="w-2/5 mx-auto">
             <Button
               type="submit"
+              disabled={isLoading}
               className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
               <div className="w-fit flex items-center gap-2">

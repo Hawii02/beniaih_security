@@ -30,7 +30,7 @@ const SitesGatesMetrics = ({ stats }: GuardMetricsProps) => {
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-4 w-full h-1/4">
+    <div className="grid lg:grid-cols-2 gap-4 w-full h-1/4">
       <div className="rounded-lg h-full space-y-4">
         {metrics.slice(0,2).map((metric, i) => (
           <Card className="flex justify-center text-center" key={i}>
