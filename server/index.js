@@ -5,7 +5,7 @@ import visitorRoutes from './routes/visitorRoutes.js'
 import siteRoutes from './routes/siteRoutes.js'
 import guardRoutes from './routes/guardRoutes.js'
 import gateRoutes from './routes/gateRoutes.js'
-import guardAssignmentRoutes from './routes/guardAssignmentRoutes.js'
+import hostRoutes from './routes/hostRoutes.js'
 import contactMessageRoutes from './routes/contactMessageRoutes.js'
 import authRoutes from './routes/auth.js'
 import { corsOptions } from './config/corsOptions.js'
@@ -47,7 +47,7 @@ app.use('/visitors', visitorRoutes)
 app.use('/sites', siteRoutes)
 app.use('/gates', gateRoutes)
 app.use('/guards', guardRoutes)
-app.use('/guard-assignments', guardAssignmentRoutes)
+app.use('/hosts', hostRoutes)
 app.use('/contact-messages', contactMessageRoutes)
 
 mongoose.connection.once('open', () => {
