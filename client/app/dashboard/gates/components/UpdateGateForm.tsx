@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, ChevronsUpDown, Eye, EyeOff } from "lucide-react";
 import { Gate, useDashboardStore } from "@/store/useDashboardStore";
 import { toast } from "sonner";
 import {
@@ -26,6 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 type UpdateGateFormProps = {
   gate: Gate;
   onSuccess?: () => void;
@@ -38,6 +44,7 @@ export default function UpdateGateForm({
   const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
   const sites = useDashboardStore((state) => state.sites);
+  const guards = useDashboardStore((state) => state.guards);
   const updateGate = useDashboardStore((state) => state.updateGate);
 
   
@@ -56,7 +63,7 @@ export default function UpdateGateForm({
     return "";
   });
   const [status, setStatus] = useState<"active" | "inactive">(gate.status);
-  const [guards, setGuards] = useState<string[]>(gate.guards || []);
+  const [selectedGuards, setSelectedGuards] = useState<string[]>(gate.guards ||[]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,7 +87,7 @@ export default function UpdateGateForm({
             site: siteId,
             // site,
             status,
-            guards,
+            guards: selectedGuards,
           }),
         },
       );
@@ -109,6 +116,12 @@ export default function UpdateGateForm({
       updateGate(gate.id!, updatedGateWithId);
       toast.success("Gate updated successfully!");
       onSuccess && onSuccess();
+      // Reset form
+      setName("");
+      setStatus("inactive");
+      setSiteId("");
+      setSelectedGuards([]);
+      setError("");
     } catch (err) {
       setError("An error occurred. Please try again.");
       toast.error("An error occurred. Please try again.");
@@ -174,7 +187,49 @@ export default function UpdateGateForm({
               </SelectContent>
             </Select>
           </div>
-
+                  <div className="space-y-2">
+            <Label htmlFor="guards">Assign Guards (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal"
+                >
+                  {selectedGuards.length > 0
+                    ? `${selectedGuards.length} guard${selectedGuards.length > 1 ? "s" : ""} selected`
+                    : "Select guards"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
+                <div className="max-h-64 p-1">
+                  {guards.map((guard) => (
+                    <div
+                      key={guard.id}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => {
+                        if (selectedGuards.includes(guard.id)) {
+                          setSelectedGuards(
+                            selectedGuards.filter((id) => id !== guard.id),
+                          );
+                        } else {
+                          setSelectedGuards([...selectedGuards, guard.id]);
+                        }
+                      }}
+                    >
+                      <div className="flex h-4 w-4 items-center justify-center mr-2">
+                        {selectedGuards.includes(guard.id) && (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </div>
+                      {guard.name}
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
           <div className="w-2/5 mx-auto">
             <Button
               type="submit"

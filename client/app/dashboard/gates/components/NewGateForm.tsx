@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import {
   Select,
@@ -20,20 +20,16 @@ import {
 } from "@/components/ui/select";
 
 import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
-} from "@/components/ui/combobox";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+
 
 import { toast } from "sonner";
 import { roleColors } from "@/lib/roleColors";
+import { cn } from "@/lib/utils";
 
 type NewGateFormProps = {
   onSuccess?: () => void;
@@ -118,8 +114,6 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
     }
   };
 
-  const anchor = useComboboxAnchor();
-
   // Create a map of guard names to IDs for the combobox
   const guardItems = guards.map((guard) => ({
     id: guard.id,
@@ -189,41 +183,46 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="guards">Assign Guards (Optional)</Label>
-            <Combobox
-              multiple
-              autoHighlight
-              items={guardItems}
-              value={selectedGuards}
-              onValueChange={setSelectedGuards}
-            >
-              <ComboboxChips ref={anchor} className="w-full">
-                <ComboboxValue>
-                  {(values) => (
-                    <>
-                      {values.map((guardId: string) => {
-                        const guard = guards.find((g) => g.id === guardId);
-                        return (
-                          <ComboboxChip key={guardId}>
-                            {guard?.name || guardId}
-                          </ComboboxChip>
-                        );
-                      })}
-                      <ComboboxChipsInput placeholder="Select guards..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={anchor}>
-                <ComboboxEmpty>No guards found.</ComboboxEmpty>
-                <ComboboxList>
-                  {(item) => (
-                    <ComboboxItem key={item.id} value={item.id}>
-                      {item.name}
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal"
+                >
+                  {selectedGuards.length > 0
+                    ? `${selectedGuards.length} guard${selectedGuards.length > 1 ? "s" : ""} selected`
+                    : "Select guards"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
+                <div className="max-h-64 p-1">
+                  {guards.map((guard) => (
+                    <div
+                      key={guard.id}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => {
+                        if (selectedGuards.includes(guard.id)) {
+                          setSelectedGuards(
+                            selectedGuards.filter((id) => id !== guard.id),
+                          );
+                        } else {
+                          setSelectedGuards([...selectedGuards, guard.id]);
+                        }
+                      }}
+                    >
+                      <div className="flex h-4 w-4 items-center justify-center mr-2">
+                        {selectedGuards.includes(guard.id) && (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </div>
+                      {guard.name}
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="w-2/5 mx-auto">
