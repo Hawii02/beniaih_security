@@ -51,9 +51,6 @@ const HostStatsCard = () => {
   const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
   const hosts = useDashboardStore((state) => state.hosts);
-  // DEBUG LOGS
-  console.log("Hosts in table:", hosts);
-  console.log("First host site:", hosts[0]?.site);
   const setHosts = useDashboardStore((state) => state.setHosts);
   const deleteHost = useDashboardStore((state) => state.deleteHost);
   const sites = useDashboardStore((state) => state.sites);

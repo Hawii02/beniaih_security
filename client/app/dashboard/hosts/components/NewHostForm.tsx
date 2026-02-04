@@ -79,24 +79,17 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
       }
 
       const responseData = await response.json();
-      // DEBUG LOG
-      console.log("Host created - backend response:", responseData);
-
+      
       // Find the full site object from the store
       const fullSite = sites.find((s) => s.id === siteId);
-      // DEBUG
-      console.log("Site ID selected:", siteId);
-      console.log("Sites in store:", sites);
-      console.log("Full site found:", fullSite);
-
+      
       // Map _id to id for consistency
       const hostWithId = {
         ...responseData.host,
         id: responseData.host._id,
         site: fullSite || responseData.host.site,
       };
-      // DEBUG
-      console.log("Host with mapped data:", hostWithId);
+      
       addHost(hostWithId);
       toast.success("Host created successfully!");
       onSuccess && onSuccess();
