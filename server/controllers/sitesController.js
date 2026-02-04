@@ -21,7 +21,6 @@
 - POST /sites/:id/users (assign user to site)
 - DELETE /sites/:id/users/:userId (remove user from site)
 import Site from "../models/Site.js";
-import GuardAssignment from "../models/GuardAssignment.js";
 import Visitor from "../models/Visitor.js";
 - GET /sites (list all sites) [DONE]
 - GET /sites/:id (get site details) [DONE]
@@ -41,7 +40,6 @@ Full CRUD for site management, including setup (locations, gates, users), gate m
 */
 
 import Site from "../models/Site.js";
-import GuardAssignment from "../models/GuardAssignment.js";
 import Visitor from "../models/Visitor.js";
 
 // 1. Create a new site

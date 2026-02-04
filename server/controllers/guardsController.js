@@ -2,7 +2,6 @@ import Guard from "../models/Guard.js";
 import Gate from "../models/Gate.js";
 import Visitor from "../models/Visitor.js";
 import Site from "../models/Site.js";
-import GuardAssignment from "../models/GuardAssignment.js";
 
 // 1. Create a new guard
 export const createGuard = async (req, res) => {
@@ -220,26 +219,3 @@ export const exportGuardLogs = async (req, res) => {
   }
 };
 
-// 11. Terminate guard assignment to a site
-export const terminateGuardAssignment = async (req, res) => {
-  const { id, assignmentId } = req.params;
-  try {
-    const assignment = await GuardAssignment.findById(assignmentId).exec();
-    if (!assignment)
-      return res.status(404).json({ message: "Assignment not found." });
-    if (assignment.guard.toString() !== id)
-      return res
-        .status(400)
-        .json({ message: "Assignment does not belong to this guard." });
-
-    assignment.status = "inactive";
-    await assignment.save();
-
-    res
-      .status(200)
-      .json({ message: "Guard assignment terminated.", assignment });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error terminating guard assignment." });
-  }
-};

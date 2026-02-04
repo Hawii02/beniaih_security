@@ -170,33 +170,6 @@ router.get(
   guardsController.getGuardHistory
 );
 
-/**
- * @swagger
- * /guards/{id}/assignments/{assignmentId}/terminate:
- *   patch:
- *     tags:
- *       - Guards
- *     summary: Terminate guard assignment
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: assignmentId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Guard assignment terminated
- */
-router.patch(
-  "/:id/assignments/:assignmentId/terminate",
-  authorizePermissions("admin", "manager"),
-  guardsController.terminateGuardAssignment
-);
 
 /**
  * @swagger
