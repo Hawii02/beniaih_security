@@ -187,3 +187,29 @@ export const exportSiteLogs = async (req, res) => {
     return res.status(500).json({ message: "Error retrieving logs." });
   }
 };
+
+// Get sites with guard counts
+export const getSitesWithCounts = async (req, res) => {
+  try {
+    const sites = await Site.find()
+      .populate('gates', 'name status')
+      .populate('guards', 'name status') // This should show all guards assigned via gates
+      .populate('hosts', 'name status');
+    
+    // Add counts for easier display
+    const sitesWithCounts = sites.map(site => ({
+      ...site.toObject(),
+      gateCount: site.gates?.length || 0,
+      guardCount: site.guards?.length || 0,
+      hostCount: site.hosts?.length || 0
+    }));
+    
+    return res.status(200).json({ 
+      total: sites.length, 
+      sites: sitesWithCounts 
+    });
+  } catch (error) {
+    console.error("Error retrieving sites:", error);
+    return res.status(500).json({ message: "Error retrieving sites." });
+  }
+};

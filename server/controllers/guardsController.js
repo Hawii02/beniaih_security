@@ -5,20 +5,33 @@ import Site from "../models/Site.js";
 
 // 1. Create a new guard
 export const createGuard = async (req, res) => {
-  const { name, idNumber, phoneNumber, email } = req.body;
-  if (!name || !idNumber || !phoneNumber || !email)
-    return res.status(400).json({
-      message: "Name, ID number, phone number, and email are required.",
-    });
   try {
-    const newGuard = new Guard({ name, idNumber, phoneNumber, email });
+    const { name, idNumber, phoneNumber, email, role, status } = req.body;
+    
+    if (!name || !idNumber || !phoneNumber || !email) {
+      return res.status(400).json({
+        message: "Name, ID number, phone number, and email are required.",
+      });
+    }
+    
+    const newGuard = new Guard({ 
+      name, 
+      idNumber, 
+      phoneNumber, 
+      email,
+      role: role || "guard",
+      status: status || "inactive"
+    });
+    
     await newGuard.save();
-    res
-      .status(201)
-      .json({ message: "Guard created successfully.", guard: newGuard });
+    
+    return res.status(201).json({ 
+      message: "Guard created successfully.", 
+      guard: newGuard 
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error creating guard." });
+    console.error("Error creating guard:", error);
+    return res.status(500).json({ message: "Error creating guard." });
   }
 };
 
@@ -26,23 +39,29 @@ export const createGuard = async (req, res) => {
 export const getAllGuards = async (req, res) => {
   try {
     const guards = await Guard.find();
-    res.status(200).json({ total: guards.length, guards });
+    const total = await Guard.countDocuments();
+    
+    return res.status(200).json({ total, guards });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error retrieving guards." });
+    console.error("Error retrieving guards:", error);
+    return res.status(500).json({ message: "Error retrieving guards." });
   }
 };
 
 // 3. Get one guard
 export const getOneGuard = async (req, res) => {
-  const { id } = req.params;
   try {
-    const guard = await Guard.findById(id).exec();
-    if (!guard) return res.status(404).json({ message: "Guard not found." });
-    res.status(200).json({ guard });
+    const { id } = req.params;
+    const guard = await Guard.findById(id);
+    
+    if (!guard) {
+      return res.status(404).json({ message: "Guard not found." });
+    }
+    
+    return res.status(200).json({ guard });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error retrieving guard." });
+    console.error("Error retrieving guard:", error);
+    return res.status(500).json({ message: "Error retrieving guard." });
   }
 };
 
@@ -50,119 +69,171 @@ export const getOneGuard = async (req, res) => {
 export const updateGuard = async (req, res) => {
   try {
     const { id } = req.params;
-    const oldGuard = await Guard.findById(id).exec();
-    if (!oldGuard) return res.status(404).json({ message: "Guard not found." });
-
-    // if site is being updated/changed, handle assignment logic
-    if (
-      req.body.assignedSite &&
-      req.body.assignedSite !== oldGuard.assignedSite.toString()
-    ) {
-      // remove from old site
-      await Site.findByIdAndUpdate(oldGuard.assignedSite, {
-        $pull: { guards: oldGuard._id },
-      });
-      // add to new site
-      await Site.findByIdAndUpdate(req.bodyassignedSite, {
-        $push: { guards: oldGuard._id },
-      });
+    const { name, idNumber, phoneNumber, email, role, status } = req.body;
+    
+    const guard = await Guard.findById(id);
+    if (!guard) {
+      return res.status(404).json({ message: "Guard not found." });
     }
 
-    const updatedGuard = await Guard.findByIdAndUpdate(id, req.body, {
-      new: true,
-    }).populate("site");
+    const updatedGuard = await Guard.findByIdAndUpdate(
+      id, 
+      { name, idNumber, phoneNumber, email, role, status },
+      { new: true }
+    );
 
-    res
-      .status(200)
-      .json({ message: "Guard updated successfully.", guard: updatedGuard });
+    return res.status(200).json({ 
+      message: "Guard updated successfully.", 
+      guard: updatedGuard 
+    });
   } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: "Error updating guard.", error: error.message });
+    console.error("Error updating guard:", error);
+    return res.status(500).json({ 
+      message: "Error updating guard.", 
+      error: error.message 
+    });
   }
 };
 
 // 5. Delete guard
 export const deleteGuard = async (req, res) => {
-  const { id } = req.params;
   try {
-    const guard = await Guard.findById(id).exec();
-    if (!guard) return res.status(404).json({ message: "Guard not found." });
-    // remove guard from assigned site's guards array
-    await Site.findByIdAndUpdate(guard.assignedSite, {$pull: {guards: guard._id}})
-    // delete guard
+    const { id } = req.params;
+    
+    const guard = await Guard.findById(id);
+    if (!guard) {
+      return res.status(404).json({ message: "Guard not found." });
+    }
+    
+    // Remove guard from all gates
+    await Gate.updateMany(
+      { guards: id },
+      { $pull: { guards: id } }
+    );
+    
+    // Get all sites that have this guard
+    const sites = await Site.find({ guards: id });
+    
+    // For each site, clean up the guards array
+    for (const site of sites) {
+      await cleanupSiteGuards(site._id);
+    }
+    
+    // Delete the guard
     await Guard.findByIdAndDelete(id);
-    res.status(200).json({ message: "Guard deleted successfully." });
+    
+    return res.status(200).json({ message: "Guard deleted successfully." });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error deleting guard.", error: error.message });
+    console.error("Error deleting guard:", error);
+    return res.status(500).json({ 
+      message: "Error deleting guard.", 
+      error: error.message 
+    });
+  }
+};
+
+// Helper function to clean up site guards (same as in Gate controller)
+const cleanupSiteGuards = async (siteId) => {
+  try {
+    // Get all gates for this site
+    const gates = await Gate.find({ site: siteId });
+    
+    // Collect all unique guard IDs across all gates
+    const allGuardIds = new Set();
+    gates.forEach(gate => {
+      gate.guards.forEach(guardId => {
+        allGuardIds.add(guardId.toString());
+      });
+    });
+    
+    // Update the site with only the guards that are actually assigned
+    await Site.findByIdAndUpdate(
+      siteId,
+      { guards: Array.from(allGuardIds) },
+      { new: true }
+    );
+  } catch (error) {
+    console.error("Error cleaning up site guards:", error);
   }
 };
 
 // 6. List gates assigned to a guard
 export const getGatesForGuard = async (req, res) => {
-  const { id } = req.params;
   try {
-    const gates = await Gate.find({ guards: id });
-    res.status(200).json({ total: gates.length, gates });
+    const { id } = req.params;
+    
+    const gates = await Gate.find({ guards: id })
+      .populate("site", "name location status");
+    
+    return res.status(200).json({ total: gates.length, gates });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error retrieving gates for guard." });
+    console.error("Error retrieving gates for guard:", error);
+    return res.status(500).json({ message: "Error retrieving gates for guard." });
   }
 };
 
 // 7. Update guard status
 export const updateGuardStatus = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
   try {
-    const guard = await Guard.findById(id).exec();
-    if (!guard) return res.status(404).json({ message: "Guard not found." });
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const guard = await Guard.findById(id);
+    if (!guard) {
+      return res.status(404).json({ message: "Guard not found." });
+    }
+    
     guard.status = status;
     await guard.save();
-    res.status(200).json({ message: "Guard status updated.", guard });
+    
+    return res.status(200).json({ message: "Guard status updated.", guard });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error updating guard status." });
+    console.error("Error updating guard status:", error);
+    return res.status(500).json({ message: "Error updating guard status." });
   }
 };
 
 // 8. Guard assignment/activity history
 export const getGuardHistory = async (req, res) => {
-  const { id } = req.params;
   try {
-    // Example: find all gates and visitor logs for this guard
-    const gates = await Gate.find({ guards: id });
+    const { id } = req.params;
+    
+    const gates = await Gate.find({ guards: id })
+      .populate("site", "name location");
     const visitorLogs = await Visitor.find({ guard: id });
-    res.status(200).json({ gates, visitorLogs });
+    
+    return res.status(200).json({ gates, visitorLogs });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error retrieving guard history." });
+    console.error("Error retrieving guard history:", error);
+    return res.status(500).json({ message: "Error retrieving guard history." });
   }
 };
 
 // 9. Guard analytics (e.g., visitors processed)
 export const getGuardAnalytics = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
     const visitorCount = await Visitor.countDocuments({ guard: id });
-    res.status(200).json({ guardId: id, visitorCount });
+    
+    return res.status(200).json({ guardId: id, visitorCount });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error retrieving guard analytics." });
+    console.error("Error retrieving guard analytics:", error);
+    return res.status(500).json({ message: "Error retrieving guard analytics." });
   }
 };
 
 // 10. Export guard logs (CSV/PDF)
 export const exportGuardLogs = async (req, res) => {
-  const { id } = req.params;
-  const { format } = req.query;
   try {
+    const { id } = req.params;
+    const { format } = req.query;
+    
     const logs = await Visitor.find({ guard: id }).lean();
+    
     if (!logs || logs.length === 0) {
       return res.status(404).json({ message: "No logs found for this guard." });
     }
+    
     if (format === "csv") {
       const { Parser } = await import("json2csv");
       const fields = [
@@ -209,13 +280,12 @@ export const exportGuardLogs = async (req, res) => {
       });
       doc.end();
     } else {
-      return res
-        .status(400)
-        .json({ message: "Invalid format. Use 'csv' or 'pdf'." });
+      return res.status(400).json({ 
+        message: "Invalid format. Use 'csv' or 'pdf'." 
+      });
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error exporting guard logs." });
+    console.error("Error exporting guard logs:", error);
+    return res.status(500).json({ message: "Error exporting guard logs." });
   }
 };
-

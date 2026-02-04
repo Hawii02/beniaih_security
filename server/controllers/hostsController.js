@@ -1,11 +1,10 @@
-
 import Host from "../models/Host.js";
 import Site from "../models/Site.js";
 
 // 1. Assign a host to a site
 export const createHost = async (req, res) => {
   try {
-    const { name, idNumber, phoneNumber, email, unit, site } = req.body;
+    const { name, idNumber, phoneNumber, email, unit, site, status } = req.body;
     
     // Validate site exists
     const existingSite = await Site.findById(site);
@@ -20,6 +19,7 @@ export const createHost = async (req, res) => {
       phoneNumber,
       email,
       unit,
+      status: status || "inactive"
     });
     
     await newHost.save();
@@ -30,15 +30,16 @@ export const createHost = async (req, res) => {
       { $push: { hosts: newHost._id } },
       { new: true }
     );
-     // Populate the site before returning
-    await newHost.populate('site');
+    
+    // Populate the site before returning (with limited fields)
+    await newHost.populate('site', 'name location status');
 
     return res.status(201).json({
       message: `Host ${newHost.name} created successfully.`,
       host: newHost,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating host:", error);
     return res.status(500).json({
       message: "Error creating host.",
       error: error.message
@@ -49,11 +50,13 @@ export const createHost = async (req, res) => {
 // 2. Get all hosts
 export const getAllHosts = async (req, res) => {
   try {
-    const hosts = await Host.find().populate('site');
+    const hosts = await Host.find()
+      .populate('site', 'name location status'); // Only populate needed fields
     const total = await Host.countDocuments();
-    res.status(200).json({ total: total, hosts });
+    
+    return res.status(200).json({ total, hosts });
   } catch (error) {
-    console.error(error);
+    console.error("Error getting hosts:", error);
     return res.status(500).json({ message: "Error getting hosts." });
   }
 };
@@ -62,11 +65,16 @@ export const getAllHosts = async (req, res) => {
 export const getOneHost = async (req, res) => {
   try {
     const { id } = req.params;
-    const host = await Host.findById(id).populate('site').exec();
-    if (!host) return res.status(404).json({ message: "Host not found." });
-    res.status(200).json({ host });
+    const host = await Host.findById(id)
+      .populate('site', 'name location status');
+    
+    if (!host) {
+      return res.status(404).json({ message: "Host not found." });
+    }
+    
+    return res.status(200).json({ host });
   } catch (error) {
-    console.error(error);
+    console.error("Error getting host:", error);
     return res.status(500).json({ message: "Error getting host." });
   }
 };
@@ -103,14 +111,14 @@ export const updateHost = async (req, res) => {
       id,
       { name, idNumber, phoneNumber, email, unit, site, status },
       { new: true }
-    ).populate("site");
+    ).populate("site", "name location status"); // Only populate needed fields
 
     return res.status(200).json({ 
       message: "Host updated successfully.", 
       host: updatedHost 
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating host:", error);
     return res.status(500).json({ 
       message: "Error updating host.", 
       error: error.message 
@@ -131,7 +139,7 @@ export const deleteHost = async (req, res) => {
     // Remove host from site's hosts array
     if (host.site) {
       await Site.findByIdAndUpdate(
-        host.site, // Changed from host.assignedSite
+        host.site,
         { $pull: { hosts: host._id } }
       );
     }
@@ -141,11 +149,10 @@ export const deleteHost = async (req, res) => {
     
     return res.status(200).json({ message: "Host deleted successfully." });
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting host:", error);
     return res.status(500).json({ 
       message: "Error deleting host.", 
       error: error.message 
     });
   }
 };
-// 
