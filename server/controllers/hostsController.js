@@ -30,7 +30,9 @@ export const createHost = async (req, res) => {
       { $push: { hosts: newHost._id } },
       { new: true }
     );
-    
+     // Populate the site before returning
+    await newHost.populate('site');
+
     return res.status(201).json({
       message: `Host ${newHost.name} created successfully.`,
       host: newHost,
