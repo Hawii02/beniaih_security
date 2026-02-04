@@ -62,35 +62,7 @@ router.post(
   hostsController.createHost
 );
 
-/**
- * @swagger
- * /hosts/{siteId}/{hostId}/assign:
- *   post:
- *     tags:
- *       - Hosts
- *     summary: Assign an existing host to a different site
- *     parameters:
- *       - in: path
- *         name: siteId
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: hostId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Host assigned successfully
- *       404:
- *         description: Host or site not found
- */
-router.post(
-  "/:siteId/:hostId/assign",
-  authorizePermissions("admin", "manager"),
-  hostsController.assignHostToSite
-);
+
 
 /**
  * @swagger
