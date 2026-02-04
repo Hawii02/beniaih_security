@@ -49,7 +49,7 @@ export const createHost = async (req, res) => {
 // 2. Get all hosts
 export const getAllHosts = async (req, res) => {
   try {
-    const hosts = await Host.find();
+    const hosts = await Host.find().populate('site');
     const total = await Host.countDocuments();
     res.status(200).json({ total: total, hosts });
   } catch (error) {
@@ -62,7 +62,7 @@ export const getAllHosts = async (req, res) => {
 export const getOneHost = async (req, res) => {
   try {
     const { id } = req.params;
-    const host = await Host.findById(id).exec();
+    const host = await Host.findById(id).populate('site').exec();
     if (!host) return res.status(404).json({ message: "Host not found." });
     res.status(200).json({ host });
   } catch (error) {
