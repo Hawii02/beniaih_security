@@ -50,15 +50,19 @@ export const createGate = async (req, res) => {
     await gate.save();
     
     // Add the gate to the site's gates array
+    // AND add the guards to the site's guards array (if not already there)
     await Site.findByIdAndUpdate(
       site,
-      { $push: { gates: gate._id } },
+      { 
+        $push: { gates: gate._id },
+        $addToSet: { guards: { $each: guards || [] } } // $addToSet prevents duplicates
+      },
       { new: true }
     );
 
     // Populate both site AND guards before returning
     await gate.populate("site", "name location status");
-    await gate.populate("guards", "name email phone role status"); // ADD THIS
+    await gate.populate("guards", "name email phone role status");
     
     return res.status(201).json({ 
       message: "Gate created successfully.",
@@ -92,8 +96,26 @@ export const updateGate = async (req, res) => {
       // Add to new site
       await Site.findByIdAndUpdate(
         site,
-        { $push: { gates: oldGate._id } }
+        { 
+          $push: { gates: oldGate._id },
+          $addToSet: { guards: { $each: guards || [] } }
+        }
       );
+      
+      // Clean up old site's guards (remove guards that are no longer assigned to any gate)
+      await cleanupSiteGuards(oldGate.site);
+    } else {
+      // Same site, just update the guards
+      if (guards) {
+        // Add new guards to site
+        await Site.findByIdAndUpdate(
+          site,
+          { $addToSet: { guards: { $each: guards } } }
+        );
+        
+        // Clean up guards no longer assigned to any gate in this site
+        await cleanupSiteGuards(site);
+      }
     }
     
     const updatedGate = await Gate.findByIdAndUpdate(
@@ -102,7 +124,7 @@ export const updateGate = async (req, res) => {
       { new: true }
     )
       .populate("site", "name location status")
-      .populate("guards", "name email phone role status"); // ADD THIS
+      .populate("guards", "name email phone role status");
     
     return res.status(200).json({ 
       message: "Gate updated successfully.", 
@@ -115,6 +137,32 @@ export const updateGate = async (req, res) => {
       message: "Error updating gate.", 
       error: error.message 
     });
+  }
+};
+
+// Helper function to clean up site guards
+// Removes guards from site that are no longer assigned to any gate
+const cleanupSiteGuards = async (siteId) => {
+  try {
+    // Get all gates for this site
+    const gates = await Gate.find({ site: siteId });
+    
+    // Collect all unique guard IDs across all gates
+    const allGuardIds = new Set();
+    gates.forEach(gate => {
+      gate.guards.forEach(guardId => {
+        allGuardIds.add(guardId.toString());
+      });
+    });
+    
+    // Update the site with only the guards that are actually assigned
+    await Site.findByIdAndUpdate(
+      siteId,
+      { guards: Array.from(allGuardIds) },
+      { new: true }
+    );
+  } catch (error) {
+    console.error("Error cleaning up site guards:", error);
   }
 };
 
@@ -132,6 +180,9 @@ export const deleteGate = async (req, res) => {
       gate.site,
       { $pull: { gates: gate._id } }
     );
+    
+    // Clean up site's guards after removing the gate
+    await cleanupSiteGuards(gate.site);
     
     // Delete the gate
     await Gate.findByIdAndDelete(req.params.id);
