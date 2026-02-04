@@ -4,7 +4,9 @@ import Site from "../models/Site.js";
 // Get all gates
 export const getAllGates = async (req, res) => {
   try {
-    const gates = await Gate.find().populate("site");
+    const gates = await Gate.find()
+      .populate("site", "name location status") // Limit site fields to avoid circular data
+      .populate("guards", "name email phone role status"); // ADD THIS - populate guards
     
     if (gates.length === 0) {
       return res.status(200).json({ message: "No gates found", total: 0, gates: [] });
@@ -19,7 +21,9 @@ export const getAllGates = async (req, res) => {
 // Get a single gate by ID
 export const getGateById = async (req, res) => {
   try {
-    const gate = await Gate.findById(req.params.id).populate("site");
+    const gate = await Gate.findById(req.params.id)
+      .populate("site", "name location status")
+      .populate("guards", "name email phone role status"); // ADD THIS
     
     if (!gate) {
       return res.status(404).json({ message: "Gate not found" });
@@ -52,8 +56,9 @@ export const createGate = async (req, res) => {
       { new: true }
     );
 
-     // Populate the site before returning
-    await gate.populate('site');
+    // Populate both site AND guards before returning
+    await gate.populate("site", "name location status");
+    await gate.populate("guards", "name email phone role status"); // ADD THIS
     
     return res.status(201).json({ 
       message: "Gate created successfully.",
@@ -95,7 +100,9 @@ export const updateGate = async (req, res) => {
       id,
       { name, site, status, guards },
       { new: true }
-    ).populate('site');
+    )
+      .populate("site", "name location status")
+      .populate("guards", "name email phone role status"); // ADD THIS
     
     return res.status(200).json({ 
       message: "Gate updated successfully.", 
@@ -129,16 +136,18 @@ export const deleteGate = async (req, res) => {
     // Delete the gate
     await Gate.findByIdAndDelete(req.params.id);
     
-    return res.status(200).json({ message: "Gate deleted" }); // Add return here
+    return res.status(200).json({ message: "Gate deleted" });
   } catch (err) {
-    return res.status(500).json({ message: err.message }); // Add return here
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // get active gates
 export const getActiveGates = async (req, res) => {
   try {
-    const activeGates = await Gate.find({ status: "active" }).populate("site");
+    const activeGates = await Gate.find({ status: "active" })
+      .populate("site", "name location status")
+      .populate("guards", "name email phone role status"); // ADD THIS
     
     if (activeGates.length === 0) {
       return res.status(200).json({ message: "No active gates found", total: 0, gates: [] });
@@ -153,7 +162,9 @@ export const getActiveGates = async (req, res) => {
 // get inactive gates
 export const getInactiveGates = async (req, res) => {
   try {
-    const inactiveGates = await Gate.find({ status: "inactive" }).populate("site");
+    const inactiveGates = await Gate.find({ status: "inactive" })
+      .populate("site", "name location status")
+      .populate("guards", "name email phone role status"); // ADD THIS
     
     if (inactiveGates.length === 0) {
       return res.status(200).json({ message: "No inactive gates found", total: 0, gates: [] });
